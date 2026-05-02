@@ -1,0 +1,316 @@
+"use client";
+
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+
+const products: any = {
+  starter: {
+    name: "Starter Learning Pack",
+    price: "€49",
+    tag: "For beginners",
+    link: "https://payment-links.mollie.com/payment/HAhETgqwvEFLAbrmsqCE9",
+  },
+  advanced: {
+    name: "Advanced Learning Pack",
+    price: "€149",
+    tag: "Most popular",
+    link: "https://payment-links.mollie.com/payment/sxrynyX7dZmgrdh32Z3dD",
+  },
+  premium: {
+    name: "Premium Resource Bundle",
+    price: "€219",
+    tag: "Best value",
+    link: "https://payment-links.mollie.com/payment/VJZUEYBt9JTTi5xWDTrDt",
+  },
+};
+
+const faq = [
+  ["What do I receive?", "You receive PDF guides, templates, worksheets, planners and checklists."],
+  ["How is it delivered?", "Delivery is made by email after successful payment confirmation."],
+  ["Can I get a refund?", "Refunds are not available after digital delivery is completed."],
+  ["Is payment secure?", "Yes, payment is processed securely through Mollie checkout."],
+];
+
+export default function ProductPage() {
+  const { slug } = useParams();
+  const product = products[slug as string];
+
+  const [cart, setCart] = useState(false);
+  const [email, setEmail] = useState("");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  if (!product) return <main className="p-10">Product not found</main>;
+
+  const canPay = email.includes("@");
+
+  return (
+    <main className="min-h-screen bg-[#f3f0ff] text-[#090522]">
+      <section className="bg-[#13083d] px-8 py-8 text-white">
+        <header className="mx-auto flex max-w-7xl items-center justify-between">
+          <Link href="/" className="text-3xl font-black">
+            HOLYTIME
+          </Link>
+
+          <button
+            onClick={() => setCart(true)}
+            className="rounded-full bg-[#6645e8] px-7 py-3 font-bold"
+          >
+            Add to cart
+          </button>
+        </header>
+
+        <div className="mx-auto grid max-w-7xl items-center gap-14 py-20 lg:grid-cols-2">
+          <div>
+            <p className="font-bold text-[#9c7cff]">{product.tag}</p>
+
+            <h1 className="mt-5 text-6xl font-black leading-[0.95] md:text-7xl">
+              {product.name}
+            </h1>
+
+            <p className="mt-6 text-xl leading-9 text-white/75">
+              Premium digital learning pack with structured guides, templates,
+              worksheets, checklists and planning resources for personal study.
+            </p>
+
+            <p className="mt-8 text-6xl font-black text-[#9c7cff]">
+              {product.price}
+            </p>
+
+            <div className="mt-8 flex gap-4">
+              <button
+                onClick={() => setCart(true)}
+                className="rounded-2xl bg-[#6645e8] px-9 py-4 font-bold"
+              >
+                Add to cart
+              </button>
+
+              <a
+                href="#details"
+                className="rounded-2xl bg-white px-9 py-4 font-bold text-black"
+              >
+                View details
+              </a>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] bg-white p-3 shadow-2xl">
+            <img
+              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80"
+              className="h-[420px] w-full rounded-[22px] object-cover"
+              alt={product.name}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="details"
+        className="bg-gradient-to-r from-[#eee8ff] via-white to-[#e8eeff] px-8 py-24"
+      >
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
+          <div>
+            <h2 className="text-5xl font-black">
+              What’s inside <span className="text-[#7657e8]">the pack?</span>
+            </h2>
+
+            <p className="mt-6 text-lg leading-8 text-black/65">
+              This product is built to make learning easier and more organized.
+              You receive ready-to-use digital materials for planning, tracking,
+              note-taking and structured study.
+            </p>
+
+            <div className="mt-10 grid gap-5 sm:grid-cols-2">
+              {[
+                "PDF guides",
+                "Worksheets",
+                "Study planner",
+                "Checklists",
+                "Templates",
+                "Progress tracker",
+              ].map((x) => (
+                <div key={x} className="rounded-[14px] bg-white p-5 font-bold shadow-sm">
+                  ✓ {x}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[22px] border-4 border-[#b14cff] bg-[#141329] p-6 shadow-2xl">
+            <div className="rounded-[16px] bg-[#0d0d19] p-7 text-white">
+              <p className="text-sm text-[#9c7cff]">PRODUCT PREVIEW</p>
+
+              <h3 className="mt-5 text-4xl font-black">
+                Digital delivery system
+              </h3>
+
+              <div className="mt-8 space-y-4 text-white/75">
+                <p>📘 Learning guides</p>
+                <p>🧾 Templates and worksheets</p>
+                <p>📊 Progress tracking materials</p>
+                <p>📩 Delivery by email</p>
+                <p>🔒 Secure payment through Mollie</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-gradient-to-r from-[#eee8ff] via-white to-[#e8eeff] px-8 py-24">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-5xl font-black">How it works</h2>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-4">
+            {[
+              ["01", "Add to cart", "Choose the product and open the cart."],
+              ["02", "Enter email", "Use the correct email for delivery."],
+              ["03", "Pay securely", "Checkout is completed through Mollie."],
+              ["04", "Receive files", "Digital resources are sent after confirmation."],
+            ].map(([n, t, d]) => (
+              <div key={n} className="rounded-[14px] bg-white p-7 shadow-lg">
+                <p className="text-5xl font-black text-[#7657e8]">{n}</p>
+                <h3 className="mt-5 text-2xl font-black">{t}</h3>
+                <p className="mt-3 leading-7 text-black/60">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-gradient-to-r from-[#eee8ff] via-white to-[#e8eeff] px-8 py-24">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-5xl font-black">
+            Frequently Asked <span className="text-[#7657e8]">Questions</span>
+          </h2>
+
+          <div className="mt-10 space-y-5">
+            {faq.map(([q, a], i) => (
+              <div key={q} className="rounded-[10px] border border-[#090522] bg-white/50">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full justify-between px-8 py-7 text-left text-2xl"
+                >
+                  <span>{q}</span>
+                  <span>{openFaq === i ? "−" : "⌄"}</span>
+                </button>
+
+                {openFaq === i && (
+                  <p className="px-8 pb-7 text-lg leading-8 text-black/60">
+                    {a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-[#13083d] px-8 py-10 text-white">
+        <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-4 text-sm text-white/60">
+          <p>© Holytime · Digital products only</p>
+
+          <div className="flex gap-5">
+            <Link href="/rules">Rules</Link>
+            <Link href="/refund-policy">Refund</Link>
+            <Link href="/delivery">Delivery</Link>
+            <Link href="/privacy">Privacy</Link>
+          </div>
+        </div>
+      </footer>
+
+      {cart && (
+        <div className="fixed inset-0 z-50 flex">
+          <div
+            onClick={() => setCart(false)}
+            className="flex-1 bg-black/50 backdrop-blur-sm"
+          />
+
+          <aside className="flex h-full w-[420px] flex-col bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-4">
+              <h3 className="text-2xl font-black">Your cart</h3>
+              <button onClick={() => setCart(false)} className="text-xl">
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6 flex gap-4">
+              <img
+                src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80"
+                className="h-20 w-20 rounded-lg object-cover"
+                alt={product.name}
+              />
+
+              <div className="flex-1">
+                <p className="font-black">{product.name}</p>
+                <p className="text-sm text-black/60">Digital product</p>
+                <p className="mt-2 font-bold">{product.price}</p>
+              </div>
+
+              <button onClick={() => setCart(false)} className="text-black/40">
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-8">
+              <p className="mb-2 text-sm font-bold">Delivery email</p>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full rounded-lg border border-black/20 px-4 py-3 outline-none focus:border-black"
+              />
+            </div>
+
+            <div className="mt-8 space-y-2 border-t pt-5">
+              <div className="flex justify-between">
+                <span className="text-black/60">Subtotal</span>
+                <span className="font-bold">{product.price}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-black/60">Delivery</span>
+                <span className="font-bold">Free</span>
+              </div>
+
+              <div className="mt-3 flex justify-between text-xl font-black">
+                <span>Total</span>
+                <span>{product.price}</span>
+              </div>
+            </div>
+
+            <a
+              href={canPay ? product.link : "#"}
+              target={canPay ? "_blank" : ""}
+              onClick={(e) => !canPay && e.preventDefault()}
+              className={`mt-auto rounded-xl py-4 text-center font-black transition ${
+                canPay
+                  ? "bg-black text-white hover:opacity-90"
+                  : "bg-black/10 text-black/40"
+              }`}
+            >
+              {canPay ? "Proceed to payment" : "Enter email first"}
+            </a>
+
+            <p className="mt-4 text-center text-xs text-black/40">
+              Secure checkout powered by Mollie
+            </p>
+          </aside>
+        </div>
+      )}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-4 flex justify-between items-center">
+  <div>
+    <p className="font-bold">{product.name}</p>
+    <p className="text-black/60">{product.price}</p>
+  </div>
+
+  <button
+    onClick={() => setCart(true)}
+    className="bg-[#6541df] text-white px-6 py-3 rounded-xl font-bold"
+  >
+    Buy now
+  </button>
+</div>
+
+    </main>
+  );
+}
