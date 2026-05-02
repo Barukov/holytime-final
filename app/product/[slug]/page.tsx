@@ -8,20 +8,20 @@ const products: any = {
   starter: {
     name: "Starter Learning Pack",
     price: "€49",
+    priceValue: "49.00",
     tag: "For beginners",
-    link: "https://payment-links.mollie.com/payment/HAhETgqwvEFLAbrmsqCE9",
   },
   advanced: {
     name: "Advanced Learning Pack",
     price: "€149",
+    priceValue: "149.00",
     tag: "Most popular",
-    link: "https://payment-links.mollie.com/payment/sxrynyX7dZmgrdh32Z3dD",
   },
   premium: {
     name: "Premium Resource Bundle",
     price: "€219",
+    priceValue: "219.00",
     tag: "Best value",
-    link: "https://payment-links.mollie.com/payment/VJZUEYBt9JTTi5xWDTrDt",
   },
 };
 
@@ -279,17 +279,36 @@ export default function ProductPage() {
             </div>
 
             <a
-              href={canPay ? product.link : "#"}
-              target={canPay ? "_blank" : ""}
-              onClick={(e) => !canPay && e.preventDefault()}
-              className={`mt-auto rounded-xl py-4 text-center font-black transition ${
-                canPay
-                  ? "bg-black text-white hover:opacity-90"
-                  : "bg-black/10 text-black/40"
-              }`}
-            >
-              {canPay ? "Proceed to payment" : "Enter email first"}
-            </a>
+  href="#"
+  onClick={async (e) => {
+    e.preventDefault();
+
+    if (!canPay) return;
+
+    const res = await fetch("/api/create-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId: slug,
+        name: product.name,
+        priceValue: product.priceValue,
+        customerEmail: email,
+      }),
+    });
+
+    const data = await res.json();
+    window.location.href = data.checkoutUrl;
+  }}
+  className={`mt-auto rounded-xl py-4 text-center font-black transition ${
+    canPay
+      ? "bg-black text-white hover:opacity-90"
+      : "bg-black/10 text-black/40"
+  }`}
+>
+  {canPay ? "Proceed to payment" : "Enter email first"}
+</a>
 
             <p className="mt-4 text-center text-xs text-black/40">
               Secure checkout powered by Mollie
