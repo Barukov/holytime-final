@@ -1,6 +1,6 @@
-import Script from "next/script";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import PaddleProvider from "./PaddleProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,24 +30,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
-
-        {/* PADDLE SCRIPT */}
-        <Script
-          src="https://cdn.paddle.com/paddle/v2/paddle.js"
-          strategy="afterInteractive"
-        />
-
-        {/* PADDLE INIT */}
-        <Script id="paddle-init" strategy="afterInteractive">
-          {`
-            if (window.Paddle) {
-              Paddle.Environment.set("production");
-              Paddle.Initialize({
-                token: "live_c0bb423aebbbe5671abf6d87cd4"
-              });
-            }
-          `}
-        </Script>
+        <PaddleProvider />
       </body>
     </html>
   );
