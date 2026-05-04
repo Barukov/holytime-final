@@ -29,7 +29,7 @@ const faq = [
   ["What do I receive?", "You receive PDF guides, templates, worksheets, planners and checklists."],
   ["How is it delivered?", "Delivery is made by email after successful payment confirmation."],
   ["Can I get a refund?", "Refunds are not available after digital delivery is completed."],
-  ["Is payment secure?", "Yes, payment is processed securely through Mollie checkout."],
+  ["Is payment secure?", "Yes, payment is processed securely through Paddle checkout."],
 ];
 
 export default function ProductPage() {
@@ -39,10 +39,36 @@ export default function ProductPage() {
   const [cart, setCart] = useState(false);
   const [email, setEmail] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [loading, setLoading] = useState(false);
 
   if (!product) return <main className="p-10">Product not found</main>;
 
   const canPay = email.includes("@");
+
+  const handlePayment = async () => {
+    if (!canPay || loading) return;
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/create-payment", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!data.checkoutUrl) {
+        alert("Payment error");
+        return;
+      }
+
+      window.location.href = data.checkoutUrl;
+    } catch (error) {
+      alert("Payment error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f3f0ff] text-[#090522]">
@@ -149,7 +175,7 @@ export default function ProductPage() {
                 <p>🧾 Templates and worksheets</p>
                 <p>📊 Progress tracking materials</p>
                 <p>📩 Delivery by email</p>
-                <p>🔒 Secure payment through Mollie</p>
+                <p>🔒 Secure payment through Paddle</p>
               </div>
             </div>
           </div>
@@ -164,7 +190,7 @@ export default function ProductPage() {
             {[
               ["01", "Add to cart", "Choose the product and open the cart."],
               ["02", "Enter email", "Use the correct email for delivery."],
-              ["03", "Pay securely", "Checkout is completed through Mollie."],
+              ["03", "Pay securely", "Checkout is completed through Paddle."],
               ["04", "Receive files", "Digital resources are sent after confirmation."],
             ].map(([n, t, d]) => (
               <div key={n} className="rounded-[14px] bg-white p-7 shadow-lg">
@@ -278,58 +304,38 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <a
-  href="#"
-  onClick={async (e) => {
-    e.preventDefault();
-
-    if (!canPay) return;
-
-    const res = await fetch("/api/create-payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        productId: slug,
-        name: product.name,
-        priceValue: product.priceValue,
-        customerEmail: email,
-      }),
-    });
-
-    const data = await res.json();
-    window.location.href = data.checkoutUrl;
-  }}
-  className={`mt-auto rounded-xl py-4 text-center font-black transition ${
-    canPay
-      ? "bg-black text-white hover:opacity-90"
-      : "bg-black/10 text-black/40"
-  }`}
->
-  {canPay ? "Proceed to payment" : "Enter email first"}
-</a>
+            <button
+              onClick={handlePayment}
+              disabled={!canPay || loading}
+              className={`mt-auto rounded-xl py-4 text-center font-black transition ${
+                canPay
+                  ? "bg-black text-white hover:opacity-90"
+                  : "bg-black/10 text-black/40"
+              }`}
+            >
+              {loading ? "Opening checkout..." : canPay ? "Proceed to payment" : "Enter email first"}
+            </button>
 
             <p className="mt-4 text-center text-xs text-black/40">
-              Secure checkout powered by Mollie
+              Secure checkout powered by Paddle
             </p>
           </aside>
         </div>
       )}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-4 flex justify-between items-center">
-  <div>
-    <p className="font-bold">{product.name}</p>
-    <p className="text-black/60">{product.price}</p>
-  </div>
 
-  <button
-    onClick={() => setCart(true)}
-    className="bg-[#6541df] text-white px-6 py-3 rounded-xl font-bold"
-  >
-    Buy now
-  </button>
-</div>
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between border-t bg-white p-4">
+        <div>
+          <p className="font-bold">{product.name}</p>
+          <p className="text-black/60">{product.price}</p>
+        </div>
 
+        <button
+          onClick={() => setCart(true)}
+          className="rounded-xl bg-[#6541df] px-6 py-3 font-bold text-white"
+        >
+          Buy now
+        </button>
+      </div>
     </main>
   );
 }

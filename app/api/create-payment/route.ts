@@ -1,44 +1,35 @@
 import { NextResponse } from "next/server";
-import createMollieClient from "@mollie/api-client";
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const apiKey = process.env.MOLLIE_API_KEY;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
-    if (!apiKey || !baseUrl) {
-      return NextResponse.json({ error: "Missing env" }, { status: 500 });
-    }
-
-    const { productId, name, priceValue, customerEmail } = await req.json();
-
-    if (!productId || !name || !priceValue || !customerEmail) {
-      return NextResponse.json({ error: "Missing data" }, { status: 400 });
-    }
-
-    const mollie = createMollieClient({ apiKey });
-
-    const payment = await mollie.payments.create({
-      amount: {
-        currency: "EUR",
-        value: priceValue,
+    const res = await fetch("https://api.paddle.com/transactions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.PADDLE_API_KEY}`,
+        "Content-Type": "application/json",
       },
-      description: `Holytime Learning - ${name}`,
-      redirectUrl: `${baseUrl}/success`,
-      webhookUrl: `${baseUrl}/api/mollie-webhook`,
-      metadata: {
-        productId,
-        productName: name,
-        customerEmail,
-      },
+      body: JSON.stringify({
+        items: [
+          {
+            price_id: "pri_01kqstdk4f4h6xm4nf0eqjqhms",
+            quantity: 1,
+          },
+        ],
+      }),
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Paddle error:", data);
+      return NextResponse.json({ error: data }, { status: 500 });
+    }
 
     return NextResponse.json({
-      checkoutUrl: payment.getCheckoutUrl(),
-      paymentId: payment.id,
+      checkoutUrl: data.data.checkout.url,
     });
   } catch (error) {
-    console.error("Create payment error:", error);
-    return NextResponse.json({ error: "Failed to create payment" }, { status: 500 });
+    console.error("Create Paddle checkout error:", error);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
