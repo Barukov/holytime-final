@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+
 declare global {
   interface Window {
     Paddle: any;
@@ -13,19 +14,16 @@ const products: any = {
   starter: {
     name: "Starter Learning Pack",
     price: "€1",
-    priceValue: "1.00",
     tag: "For beginners",
   },
   advanced: {
     name: "Advanced Learning Pack",
     price: "€149",
-    priceValue: "149.00",
     tag: "Most popular",
   },
   premium: {
     name: "Premium Resource Bundle",
     price: "€219",
-    priceValue: "219.00",
     tag: "Best value",
   },
 };
@@ -50,25 +48,30 @@ export default function ProductPage() {
 
   const canPay = email.includes("@");
 
-  const handlePayment = async () => {
+  const handlePayment = () => {
     if (!canPay || loading) return;
 
+    if (!window.Paddle) {
+      alert("Paddle not loaded");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
-
-      const res = await fetch("/api/create-payment", {
-        method: "POST",
+      window.Paddle.Checkout.open({
+        items: [
+          {
+            priceId: "pri_01kqstdk4f4h6xm4nf0eqjqhms",
+            quantity: 1,
+          },
+        ],
+        customer: {
+          email,
+        },
       });
-
-      const data = await res.json();
-
-      if (!data.checkoutUrl) {
-        alert("Payment error");
-        return;
-      }
-
-      window.location.href = data.checkoutUrl;
     } catch (error) {
+      console.error(error);
       alert("Payment error");
     } finally {
       setLoading(false);
@@ -135,88 +138,29 @@ export default function ProductPage() {
         </div>
       </section>
 
-      <section
-        id="details"
-        className="bg-gradient-to-r from-[#eee8ff] via-white to-[#e8eeff] px-8 py-24"
-      >
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2">
-          <div>
-            <h2 className="text-5xl font-black">
-              What’s inside <span className="text-[#7657e8]">the pack?</span>
-            </h2>
-
-            <p className="mt-6 text-lg leading-8 text-black/65">
-              This product is built to make learning easier and more organized.
-              You receive ready-to-use digital materials for planning, tracking,
-              note-taking and structured study.
-            </p>
-
-            <div className="mt-10 grid gap-5 sm:grid-cols-2">
-              {[
-                "PDF guides",
-                "Worksheets",
-                "Study planner",
-                "Checklists",
-                "Templates",
-                "Progress tracker",
-              ].map((x) => (
-                <div key={x} className="rounded-[14px] bg-white p-5 font-bold shadow-sm">
-                  ✓ {x}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[22px] border-4 border-[#b14cff] bg-[#141329] p-6 shadow-2xl">
-            <div className="rounded-[16px] bg-[#0d0d19] p-7 text-white">
-              <p className="text-sm text-[#9c7cff]">PRODUCT PREVIEW</p>
-
-              <h3 className="mt-5 text-4xl font-black">
-                Digital delivery system
-              </h3>
-
-              <div className="mt-8 space-y-4 text-white/75">
-                <p>📘 Learning guides</p>
-                <p>🧾 Templates and worksheets</p>
-                <p>📊 Progress tracking materials</p>
-                <p>📩 Delivery by email</p>
-                <p>🔒 Secure payment through Paddle</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-gradient-to-r from-[#eee8ff] via-white to-[#e8eeff] px-8 py-24">
+      <section id="details" className="px-8 py-24">
         <div className="mx-auto max-w-7xl">
-          <h2 className="text-5xl font-black">How it works</h2>
+          <h2 className="text-5xl font-black">
+            What’s inside <span className="text-[#7657e8]">the pack?</span>
+          </h2>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-4">
-            {[
-              ["01", "Add to cart", "Choose the product and open the cart."],
-              ["02", "Enter email", "Use the correct email for delivery."],
-              ["03", "Pay securely", "Checkout is completed through Paddle."],
-              ["04", "Receive files", "Digital resources are sent after confirmation."],
-            ].map(([n, t, d]) => (
-              <div key={n} className="rounded-[14px] bg-white p-7 shadow-lg">
-                <p className="text-5xl font-black text-[#7657e8]">{n}</p>
-                <h3 className="mt-5 text-2xl font-black">{t}</h3>
-                <p className="mt-3 leading-7 text-black/60">{d}</p>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2">
+            {["PDF guides", "Worksheets", "Study planner", "Checklists", "Templates", "Progress tracker"].map((x) => (
+              <div key={x} className="rounded-[14px] bg-white p-5 font-bold shadow-sm">
+                ✓ {x}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-gradient-to-r from-[#eee8ff] via-white to-[#e8eeff] px-8 py-24">
+      <section className="px-8 py-24">
         <div className="mx-auto max-w-5xl">
-          <h2 className="text-5xl font-black">
-            Frequently Asked <span className="text-[#7657e8]">Questions</span>
-          </h2>
+          <h2 className="text-5xl font-black">FAQ</h2>
 
           <div className="mt-10 space-y-5">
             {faq.map(([q, a], i) => (
-              <div key={q} className="rounded-[10px] border border-[#090522] bg-white/50">
+              <div key={q} className="rounded-[10px] border bg-white/50">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="flex w-full justify-between px-8 py-7 text-left text-2xl"
@@ -226,9 +170,7 @@ export default function ProductPage() {
                 </button>
 
                 {openFaq === i && (
-                  <p className="px-8 pb-7 text-lg leading-8 text-black/60">
-                    {a}
-                  </p>
+                  <p className="px-8 pb-7 text-lg text-black/60">{a}</p>
                 )}
               </div>
             ))}
@@ -236,25 +178,9 @@ export default function ProductPage() {
         </div>
       </section>
 
-      <footer className="bg-[#13083d] px-8 py-10 text-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-4 text-sm text-white/60">
-          <p>© Holytime · Digital products only</p>
-
-          <div className="flex gap-5">
-            <Link href="/rules">Rules</Link>
-            <Link href="/refund-policy">Refund</Link>
-            <Link href="/delivery">Delivery</Link>
-            <Link href="/privacy">Privacy</Link>
-          </div>
-        </div>
-      </footer>
-
       {cart && (
         <div className="fixed inset-0 z-50 flex">
-          <div
-            onClick={() => setCart(false)}
-            className="flex-1 bg-black/50 backdrop-blur-sm"
-          />
+          <div onClick={() => setCart(false)} className="flex-1 bg-black/50" />
 
           <aside className="flex h-full w-[420px] flex-col bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
@@ -264,22 +190,10 @@ export default function ProductPage() {
               </button>
             </div>
 
-            <div className="mt-6 flex gap-4">
-              <img
-                src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80"
-                className="h-20 w-20 rounded-lg object-cover"
-                alt={product.name}
-              />
-
-              <div className="flex-1">
-                <p className="font-black">{product.name}</p>
-                <p className="text-sm text-black/60">Digital product</p>
-                <p className="mt-2 font-bold">{product.price}</p>
-              </div>
-
-              <button onClick={() => setCart(false)} className="text-black/40">
-                ✕
-              </button>
+            <div className="mt-6">
+              <p className="font-black">{product.name}</p>
+              <p className="text-sm text-black/60">Digital product</p>
+              <p className="mt-2 font-bold">{product.price}</p>
             </div>
 
             <div className="mt-8">
@@ -288,34 +202,15 @@ export default function ProductPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full rounded-lg border border-black/20 px-4 py-3 outline-none focus:border-black"
+                className="w-full rounded-lg border px-4 py-3"
               />
-            </div>
-
-            <div className="mt-8 space-y-2 border-t pt-5">
-              <div className="flex justify-between">
-                <span className="text-black/60">Subtotal</span>
-                <span className="font-bold">{product.price}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-black/60">Delivery</span>
-                <span className="font-bold">Free</span>
-              </div>
-
-              <div className="mt-3 flex justify-between text-xl font-black">
-                <span>Total</span>
-                <span>{product.price}</span>
-              </div>
             </div>
 
             <button
               onClick={handlePayment}
               disabled={!canPay || loading}
-              className={`mt-auto rounded-xl py-4 text-center font-black transition ${
-                canPay
-                  ? "bg-black text-white hover:opacity-90"
-                  : "bg-black/10 text-black/40"
+              className={`mt-auto rounded-xl py-4 font-black ${
+                canPay ? "bg-black text-white" : "bg-black/10 text-black/40"
               }`}
             >
               {loading ? "Opening checkout..." : canPay ? "Proceed to payment" : "Enter email first"}
