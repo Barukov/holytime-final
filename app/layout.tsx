@@ -31,19 +31,21 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
 
-        {/* 🔥 ПОДКЛЮЧАЕМ PADDLE */}
+        {/* PADDLE SCRIPT */}
         <Script
           src="https://cdn.paddle.com/paddle/v2/paddle.js"
           strategy="afterInteractive"
         />
 
-        {/* 🔥 ИНИЦИАЛИЗАЦИЯ */}
+        {/* PADDLE INIT */}
         <Script id="paddle-init" strategy="afterInteractive">
           {`
-            Paddle.Environment.set("production");
-            Paddle.Initialize({
-              token: "live_c0bb423aebbbe5671abf6d87cd4"
-            });
+            if (window.Paddle) {
+              Paddle.Environment.set("production");
+              Paddle.Initialize({
+                token: "live_c0bb423aebbbe5671abf6d87cd4"
+              });
+            }
           `}
         </Script>
       </body>

@@ -13,17 +13,20 @@ declare global {
 const products: any = {
   starter: {
     name: "Starter Learning Pack",
-    price: "€1",
+    price: "€49",
+    priceId: "pri_01kqstdk4f4h6xm4nf0eqjqhms",
     tag: "For beginners",
   },
   advanced: {
     name: "Advanced Learning Pack",
     price: "€149",
+    priceId: "pri_01kqstetc9k2t3jnpm7py0r4pt",
     tag: "Most popular",
   },
   premium: {
     name: "Premium Resource Bundle",
     price: "€219",
+    priceId: "pri_01kqstfrf2r8n6wcefs5wvmyak",
     tag: "Best value",
   },
 };
@@ -60,16 +63,16 @@ export default function ProductPage() {
 
     try {
       window.Paddle.Checkout.open({
-        items: [
-          {
-            priceId: "pri_01kqstdk4f4h6xm4nf0eqjqhms",
-            quantity: 1,
-          },
-        ],
-        customer: {
-          email,
-        },
-      });
+  items: [
+    {
+      priceId: product.priceId,
+      quantity: 1,
+    },
+  ],
+  customer: {
+    email,
+  },
+});
     } catch (error) {
       console.error(error);
       alert("Payment error");
