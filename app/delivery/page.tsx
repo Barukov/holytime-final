@@ -18,7 +18,7 @@ export default function DeliveryPage() {
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {[
               ["01", "Enter email", "Use the correct email before checkout."],
-              ["02", "Pay securely", "Payment is processed through Mollie."],
+              ["02", "Pay securely", "Payment is processed through Paddle."],
               ["03", "Confirmation", "After payment, your order is confirmed."],
               ["04", "Receive files", "Digital product is sent to your email."],
             ].map(([n, t, d]) => (

@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+declare global {
+  interface Window {
+    Paddle: any;
+  }
+}
 
 const products: any = {
   starter: {

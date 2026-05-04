@@ -17,7 +17,7 @@ export default function PrivacyPage() {
 
           <div className="mt-10 space-y-6 text-lg leading-8 text-black/65">
             <p>We use your email address only to deliver your digital product and provide support.</p>
-            <p>Payment information is processed securely by Mollie. We do not store card details.</p>
+            <p>Payment information is processed securely by Paddle. We do not store card details.</p>
             <p>Your data is not sold or shared for advertising purposes.</p>
           </div>
 
