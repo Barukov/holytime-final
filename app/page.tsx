@@ -12,7 +12,7 @@ const products = [
 const faq = [
   ["What do I receive?", "PDF guides, templates, worksheets, planners and checklists."],
   ["How does delivery work?", "After payment, delivery goes to your email."],
-  ["Is payment secure?", "Yes, checkout is processed through Mollie."],
+  ["Is payment secure?", "Yes, checkout is processed through Paddle."],
   ["Can I get a refund?", "Digital products are not refundable after delivery."],
 ];
 

@@ -72,6 +72,11 @@ export default function ProductPage() {
   customer: {
     email,
   },
+  customData: {
+    productId: slug,
+    productName: product.name,
+    customerEmail: email,
+  },
 });
     } catch (error) {
       console.error(error);
