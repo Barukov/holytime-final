@@ -13,19 +13,19 @@ declare global {
 const products: any = {
   starter: {
     name: "Starter Learning Pack",
-    price: "€49",
+    price: "€219",
     priceId: "pri_01kqstdk4f4h6xm4nf0eqjqhms",
     tag: "For beginners",
   },
   advanced: {
     name: "Advanced Learning Pack",
-    price: "€149",
+    price: "€250",
     priceId: "pri_01kqstetc9k2t3jnpm7py0r4pt",
     tag: "Most popular",
   },
   premium: {
     name: "Premium Resource Bundle",
-    price: "€219",
+    price: "€500",
     priceId: "pri_01kqstfrf2r8n6wcefs5wvmyak",
     tag: "Best value",
   },

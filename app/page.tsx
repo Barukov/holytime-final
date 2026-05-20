@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 const products = [
-  ["starter", "Starter Learning Pack", "€49", "PDF guides, checklists, notes templates and study planners."],
-  ["advanced", "Advanced Learning Pack", "€149", "Worksheets, examples, progress trackers and structured resources."],
-  ["premium", "Premium Resource Bundle", "€219", "Full library with guides, templates, worksheets and bonuses."],
+  ["starter", "Starter Learning Pack", "€219", "PDF guides, checklists, notes templates and study planners."],
+  ["advanced", "Advanced Learning Pack", "€250", "Worksheets, examples, progress trackers and structured resources."],
+  ["premium", "Premium Resource Bundle", "€500", "Full library with guides, templates, worksheets and bonuses."],
 ];
 
 const faq = [
