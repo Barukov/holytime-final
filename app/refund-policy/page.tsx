@@ -37,7 +37,7 @@ export default function RefundPolicy() {
             </p>
 
             <p>
-              To request a refund, please contact us at ybarsukov07@gmail.com
+              To request a refund, please contact us at support@holytime.store
               with your payment details.
             </p>
 
