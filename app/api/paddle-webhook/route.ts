@@ -21,12 +21,16 @@ export async function POST(req: Request) {
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
     const transactionId =
-      data.id || data.transaction_id || body.event_id || body.notification_id || "unknown";
+      data.id ||
+      data.transaction_id ||
+      body.event_id ||
+      body.notification_id ||
+      "unknown";
 
+    // 🔒 анти-дубли
     if (processedEvents.has(transactionId)) {
       return new Response("OK", { status: 200 });
     }
-
     processedEvents.add(transactionId);
 
     const productId = customData.productId;
@@ -41,7 +45,6 @@ export async function POST(req: Request) {
     const addressData =
       data.customer?.address ||
       data.billing_details?.address ||
-      data.billing_address ||
       data.address ||
       {};
 
@@ -93,7 +96,9 @@ export async function POST(req: Request) {
 
       await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           chat_id: chatId,
           text,
@@ -102,16 +107,18 @@ export async function POST(req: Request) {
       });
     }
 
+    // ❌ FAILED
     if (eventType === "transaction.payment_failed") {
       await sendTelegram(`❌ <b>PAYMENT FAILED</b>
+🌐 <b>Website:</b> holytime-final.vercel.app
 
 👤 <b>Email:</b> ${customerEmail}
 📦 <b>Product:</b> ${productName}
-💳 <b>Payment method:</b> ${paymentMethod}
+💳 <b>Payment:</b> ${paymentMethod}
 🌍 <b>Country:</b> ${country}
 📍 <b>Address:</b> ${address}
 ⚠️ <b>Reason:</b> ${declineReason}
-🧾 <b>Transaction ID:</b> ${transactionId}
+🧾 <b>ID:</b> ${transactionId}
 🕒 <b>Date:</b> ${date}`);
 
       return new Response("OK", { status: 200 });
@@ -121,15 +128,17 @@ export async function POST(req: Request) {
       return new Response("OK", { status: 200 });
     }
 
-    await sendTelegram(`✅ <b>PAYMENT SUCCESSFUL</b>
+    // ✅ SUCCESS
+    await sendTelegram(`💸 <b>PAYMENT SUCCESSFUL</b>
+🌐 <b>Website:</b> holytime-final.vercel.app
 
 👤 <b>Email:</b> ${customerEmail}
 📦 <b>Product:</b> ${productName}
 💰 <b>Amount:</b> ${amount} ${currency}
-💳 <b>Payment method:</b> ${paymentMethod}
+💳 <b>Payment:</b> ${paymentMethod}
 🌍 <b>Country:</b> ${country}
 📍 <b>Address:</b> ${address}
-🧾 <b>Transaction ID:</b> ${transactionId}
+🧾 <b>ID:</b> ${transactionId}
 🕒 <b>Date:</b> ${date}`);
 
     if (!resendKey || !productId || customerEmail === "unknown") {
