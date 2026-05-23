@@ -6,6 +6,8 @@ const PRODUCT_LINKS: Record<string, string> = {
   premium: "https://drive.google.com/your-premium-file-link",
 };
 
+const processedEvents = new Set<string>();
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -18,6 +20,15 @@ export async function POST(req: Request) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
+    const transactionId =
+      data.id || data.transaction_id || body.event_id || body.notification_id || "unknown";
+
+    if (processedEvents.has(transactionId)) {
+      return new Response("OK", { status: 200 });
+    }
+
+    processedEvents.add(transactionId);
+
     const productId = customData.productId;
     const productName = customData.productName || "Digital product";
 
@@ -27,24 +38,25 @@ export async function POST(req: Request) {
       data.customer_email ||
       "unknown";
 
-    const country =
-      data.customer?.address?.country_code ||
-      data.billing_details?.address?.country_code ||
-      data.address?.country_code ||
-      "unknown";
-
     const addressData =
       data.customer?.address ||
       data.billing_details?.address ||
+      data.billing_address ||
       data.address ||
       {};
 
+    const country =
+      addressData.country_code ||
+      data.customer?.country ||
+      data.billing_address?.country ||
+      "unknown";
+
     const address =
       [
-        addressData.first_line,
+        addressData.first_line || addressData.line1,
         addressData.city,
         addressData.postal_code,
-        addressData.country_code,
+        country,
       ]
         .filter(Boolean)
         .join(", ") || "unknown";
@@ -72,29 +84,35 @@ export async function POST(req: Request) {
 
     const currency = data.currency_code || "";
 
+    const date = data.created_at
+      ? new Date(data.created_at).toLocaleString("en-GB")
+      : new Date().toLocaleString("en-GB");
+
     async function sendTelegram(text: string) {
       if (!botToken || !chatId) return;
 
       await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
           text,
+          parse_mode: "HTML",
         }),
       });
     }
 
     if (eventType === "transaction.payment_failed") {
-      await sendTelegram(`❌ ОПЛАТА ОТКЛОНЕНА
+      await sendTelegram(`❌ <b>PAYMENT FAILED</b>
 
-Email: ${customerEmail}
-Страна: ${country}
-Адрес: ${address}
-Метод оплаты: ${paymentMethod}
-Причина: ${declineReason}`);
+👤 <b>Email:</b> ${customerEmail}
+📦 <b>Product:</b> ${productName}
+💳 <b>Payment method:</b> ${paymentMethod}
+🌍 <b>Country:</b> ${country}
+📍 <b>Address:</b> ${address}
+⚠️ <b>Reason:</b> ${declineReason}
+🧾 <b>Transaction ID:</b> ${transactionId}
+🕒 <b>Date:</b> ${date}`);
 
       return new Response("OK", { status: 200 });
     }
@@ -103,14 +121,16 @@ Email: ${customerEmail}
       return new Response("OK", { status: 200 });
     }
 
-    await sendTelegram(`✅ ОПЛАТА УСПЕШНА
+    await sendTelegram(`✅ <b>PAYMENT SUCCESSFUL</b>
 
-Email: ${customerEmail}
-Страна: ${country}
-Адрес: ${address}
-Метод оплаты: ${paymentMethod}
-Сумма: ${amount} ${currency}
-Продукт: ${productName}`);
+👤 <b>Email:</b> ${customerEmail}
+📦 <b>Product:</b> ${productName}
+💰 <b>Amount:</b> ${amount} ${currency}
+💳 <b>Payment method:</b> ${paymentMethod}
+🌍 <b>Country:</b> ${country}
+📍 <b>Address:</b> ${address}
+🧾 <b>Transaction ID:</b> ${transactionId}
+🕒 <b>Date:</b> ${date}`);
 
     if (!resendKey || !productId || customerEmail === "unknown") {
       return new Response("OK", { status: 200 });
