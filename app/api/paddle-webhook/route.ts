@@ -27,11 +27,22 @@ export async function POST(req: Request) {
       body.notification_id ||
       "unknown";
 
-    // 🔒 анти-дубли
-    if (processedEvents.has(transactionId)) {
+    const eventId =
+      body.event_id ||
+      body.notification_id ||
+      `${eventType}_${transactionId}`;
+
+    if (processedEvents.has(eventId)) {
       return new Response("OK", { status: 200 });
     }
-    processedEvents.add(transactionId);
+
+    processedEvents.add(eventId);
+
+    const status =
+      data.status ||
+      data.transaction?.status ||
+      data.checkout?.status ||
+      "unknown";
 
     const productId = customData.productId;
     const productName = customData.productName || "Digital product";
@@ -96,9 +107,7 @@ export async function POST(req: Request) {
 
       await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
           text,
@@ -107,9 +116,16 @@ export async function POST(req: Request) {
       });
     }
 
-    // ❌ FAILED
     if (eventType === "transaction.payment_failed") {
-      await sendTelegram(`❌ <b>PAYMENT FAILED</b>
+      if (
+        status === "completed" ||
+        status === "paid" ||
+        status === "completed"
+      ) {
+        return new Response("OK", { status: 200 });
+      }
+
+      await sendTelegram(`⚠️ <b>PAYMENT ATTEMPT FAILED</b>
 🌐 <b>Website:</b> holytime-final.vercel.app
 
 👤 <b>Email:</b> ${customerEmail}
@@ -128,7 +144,6 @@ export async function POST(req: Request) {
       return new Response("OK", { status: 200 });
     }
 
-    // ✅ SUCCESS
     await sendTelegram(`💸 <b>PAYMENT SUCCESSFUL</b>
 🌐 <b>Website:</b> holytime-final.vercel.app
 
