@@ -4,16 +4,19 @@ import Link from "next/link";
 import { useState } from "react";
 
 const products = [
-  ["starter", "Starter Learning Pack", "€219", "PDF guides, checklists, notes templates and study planners."],
-  ["advanced", "Advanced Learning Pack", "€250", "Worksheets, examples, progress trackers and structured resources."],
-  ["premium", "Premium Resource Bundle", "€500", "Full library with guides, templates, worksheets and bonuses."],
+  ["product159", "Essential Digital Pack", "€159", "Core guides, templates and study resources."],
+  ["product161", "Professional Digital Pack", "€161", "Advanced worksheets, trackers and premium materials."],
+  ["product199", "Elite Trading Pack", "€199", "Advanced learning materials, premium strategies, technical analysis guides and structured trading resources."],
+  ["starter", "Starter Digital Pack", "€219", "PDF guides, checklists, notes templates and study planners."],
+  ["advanced", "Advanced Digital Pack", "€250", "Worksheets, examples, progress trackers and structured resources."],
+  ["premium", "Premium Digital Bundle", "€500", "Full library with guides, templates, worksheets and bonuses."],
 ];
 
 const faq = [
   ["What do I receive?", "PDF guides, templates, worksheets, planners and checklists."],
-  ["How does delivery work?", "After payment, delivery goes to your email."],
-  ["Is payment secure?", "Yes, checkout is processed through Paddle."],
-  ["Can I get a refund?", "Digital products are not refundable after delivery."],
+  ["How is it delivered?", "Delivery is made by email after successful payment confirmation."],
+  ["Can I get a refund?", "We offer a 14-day refund policy. If you are not satisfied, you can request a refund within 14 days of purchase."],
+  ["Is payment secure?", "Yes, payment is processed securely through Paddle checkout."],
 ];
 
 export default function Page() {
@@ -96,7 +99,6 @@ export default function Page() {
               className="aspect-video w-full"
               src="https://www.youtube.com/embed/NEUsYT__hRc"
               title="Product preview"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           </div>
@@ -109,25 +111,28 @@ export default function Page() {
             Choose your <span className="text-[#7657e8]">product</span>
           </h2>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {products.map(([slug, name, price, desc], i) => (
+          <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {products.map(([slug, name, price, desc]) => (
               <Link
                 key={slug}
                 href={`/product/${slug}`}
-                className={`group rounded-[20px] bg-white p-8 shadow-xl transition duration-300 hover:-translate-y-3 hover:shadow-[0_0_80px_rgba(102,69,232,.45)] ${
-                  i === 1 ? "ring-4 ring-[#6541df]/30" : ""
+                className={`group flex min-h-[390px] flex-col rounded-[20px] bg-white p-8 shadow-xl transition duration-300 hover:-translate-y-3 hover:shadow-[0_0_80px_rgba(102,69,232,.45)] ${
+                  slug === "product199" ? "ring-4 ring-[#6541df]/30" : ""
                 }`}
               >
                 <p className="text-sm font-black uppercase tracking-[0.2em] text-[#7657e8]">
-                  {i === 1 ? "Most popular" : "Digital product"}
+                  {slug === "product199" ? "Best value" : "Digital product"}
                 </p>
 
-                <h3 className="mt-5 text-3xl font-black">{name}</h3>
-                <p className="mt-5 min-h-[100px] leading-8 text-black/60">{desc}</p>
-                <p className="mt-6 text-5xl font-black">{price}</p>
+                <h3 className="mt-5 min-h-[76px] text-3xl font-black">{name}</h3>
+                <p className="mt-5 min-h-[110px] leading-8 text-black/60">{desc}</p>
 
-                <div className="mt-8 rounded-2xl bg-[#6541df] px-6 py-4 text-center font-bold text-white transition group-hover:scale-105">
-                  View product
+                <div className="mt-auto">
+                  <p className="text-5xl font-black">{price}</p>
+
+                  <div className="mt-8 rounded-2xl bg-[#6541df] px-6 py-4 text-center font-bold text-white transition group-hover:scale-105">
+                    View product
+                  </div>
                 </div>
               </Link>
             ))}
@@ -144,28 +149,23 @@ export default function Page() {
               <span className="text-[#7657e8]">Questions</span>
             </h2>
 
-            <Link
-              href="/contact"
-              className="rounded-2xl bg-[#6541df] px-10 py-4 font-bold text-white transition hover:scale-105"
-            >
+            <Link href="/contact" className="rounded-2xl bg-[#6541df] px-10 py-4 font-bold text-white transition hover:scale-105">
               CONTACT US
             </Link>
           </div>
 
           <div className="space-y-5">
             {faq.map(([q, a], i) => (
-              <div key={q} className="rounded-xl border border-[#090522] bg-white/50 transition hover:bg-white">
+              <div key={q} className="rounded-xl border border-[#090522] bg-white/50">
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
                   className="flex w-full justify-between px-8 py-7 text-left text-2xl"
                 >
                   {q}
-                  <span className={`transition ${open === i ? "rotate-180" : ""}`}>⌄</span>
+                  <span>{open === i ? "−" : "⌄"}</span>
                 </button>
 
-                <div className={`overflow-hidden transition-all duration-300 ${open === i ? "max-h-40 px-8 pb-7" : "max-h-0 px-8"}`}>
-                  <p className="text-lg leading-8 text-black/60">{a}</p>
-                </div>
+                {open === i && <p className="px-8 pb-7 text-lg leading-8 text-black/60">{a}</p>}
               </div>
             ))}
           </div>

@@ -2,6 +2,12 @@
 
 import Script from "next/script";
 
+declare global {
+  interface Window {
+    Paddle: any;
+  }
+}
+
 export default function PaddleProvider() {
   return (
     <Script
