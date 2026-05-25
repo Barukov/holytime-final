@@ -12,7 +12,7 @@ const PADDLE_PRICE_IDS: Record<string, string> = {
   product161: "pri_01ksg1ychgaeytf7yfftmrs99r",
   product199: "pri_01ksg1v9wq5gv0fkekpnk1r3sy",
   product245: "pri_01ksg4aqbr9743eq2ez4fday8g",
-  product255: "pri_...",
+  product255: "pri_01ksg4fk56b63x123tnqegtr9q",
 };
 
 export async function POST(req: Request) {
