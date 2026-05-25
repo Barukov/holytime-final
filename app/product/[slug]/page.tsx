@@ -36,7 +36,7 @@ const products: any = {
     tag: "Most popular",
   },
   product255: {
-    name: "Elite Resource Pack",
+    name: "Master Resource Pack",
     price: "€255",
     tag: "Premium choice",
   },
