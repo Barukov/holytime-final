@@ -13,6 +13,9 @@ const PRODUCT_LINKS: Record<string, string> = {
   product159: "https://drive.google.com/drive/folders/1elClIcBLP3FE5gtuHUFwBBWBoFfN5o6l?usp=sharing",
   product161: "https://drive.google.com/drive/folders/1baNo2BVX6oY5mYoqahy0hmbXu1wkzGbK?usp=sharing",
   product199: "https://drive.google.com/file/d/1ZHHXBAZ3Gu8oHkp2B215MkUl5IXtEqft/view?usp=sharing",
+
+  product245: "https://drive.google.com/drive/folders/1RqTD_vuq2LvYWH-vpQBAk2d73X6-W4ny?usp=sharing",
+  product255: "https://drive.google.com/file/d/1ZHHXBAZ3Gu8oHkp2B215MkUl5IXtEqft/view?usp=sharing",
 };
 
 const PRODUCT_NAMES: Record<string, string> = {
@@ -22,6 +25,9 @@ const PRODUCT_NAMES: Record<string, string> = {
   product159: "Essential Pack",
   product161: "Professional Pack",
   product199: "Elite Trading Pack",
+
+  product245: "Ultimate Learning Pack",
+  product255: "Master Resource Pack",
 };
 
 const processedEvents = new Set<string>();

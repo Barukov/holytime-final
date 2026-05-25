@@ -25,10 +25,20 @@ const products: any = {
     price: "€219",
     tag: "For beginners",
   },
+  product245: {
+    name: "Ultimate Learning Pack",
+    price: "€245",
+    tag: "Advanced",
+  },
   advanced: {
     name: "Advanced Learning Pack",
     price: "€250",
     tag: "Most popular",
+  },
+  product255: {
+    name: "Elite Resource Pack",
+    price: "€255",
+    tag: "Premium choice",
   },
   premium: {
     name: "Premium Resource Bundle",
@@ -94,9 +104,14 @@ export default function ProductPage() {
     <main className="min-h-screen bg-[#f3f0ff] text-[#090522]">
       <section className="bg-[#13083d] px-8 py-8 text-white">
         <header className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="text-3xl font-black">HOLYTIME</Link>
+          <Link href="/" className="text-3xl font-black">
+            HOLYTIME
+          </Link>
 
-          <button onClick={() => setCart(true)} className="rounded-full bg-[#6645e8] px-7 py-3 font-bold">
+          <button
+            onClick={() => setCart(true)}
+            className="rounded-full bg-[#6645e8] px-7 py-3 font-bold"
+          >
             Add to cart
           </button>
         </header>
@@ -112,21 +127,30 @@ export default function ProductPage() {
             <p className="mt-6 text-xl leading-9 text-white/75">
               Premium digital learning pack with structured guides, templates,
               worksheets, checklists and planning resources for personal study.
-              <br /><br />
+              <br />
+              <br />
               By purchasing, you agree to our{" "}
               <Link href="/rules" className="underline">terms</Link>,{" "}
               <Link href="/delivery" className="underline">delivery</Link> and{" "}
               <Link href="/refund-policy" className="underline">refund policy</Link>.
             </p>
 
-            <p className="mt-8 text-6xl font-black text-[#9c7cff]">{product.price}</p>
+            <p className="mt-8 text-6xl font-black text-[#9c7cff]">
+              {product.price}
+            </p>
 
             <div className="mt-8 flex gap-4">
-              <button onClick={() => setCart(true)} className="rounded-2xl bg-[#6645e8] px-9 py-4 font-bold">
+              <button
+                onClick={() => setCart(true)}
+                className="rounded-2xl bg-[#6645e8] px-9 py-4 font-bold"
+              >
                 Add to cart
               </button>
 
-              <a href="#details" className="rounded-2xl bg-white px-9 py-4 font-bold text-black">
+              <a
+                href="#details"
+                className="rounded-2xl bg-white px-9 py-4 font-bold text-black"
+              >
                 View details
               </a>
             </div>
@@ -189,7 +213,9 @@ export default function ProductPage() {
           <aside className="flex h-full w-[420px] flex-col bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <h3 className="text-2xl font-black">Your cart</h3>
-              <button onClick={() => setCart(false)} className="text-xl">✕</button>
+              <button onClick={() => setCart(false)} className="text-xl">
+                ✕
+              </button>
             </div>
 
             <div className="mt-6">
