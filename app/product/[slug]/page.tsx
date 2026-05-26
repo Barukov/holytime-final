@@ -32,7 +32,7 @@ const products: any = {
   },
   advanced: {
     name: "Advanced Learning Pack",
-    price: "€249",
+    price: "€250",
     tag: "Most popular",
   },
   product255: {
