@@ -7,7 +7,7 @@ import { useState } from "react";
 const products: any = {
   product159: {
     name: "Essential Learning Pack",
-    price: "€159",
+    price: "€249",
     tag: "Special offer",
   },
   product161: {
