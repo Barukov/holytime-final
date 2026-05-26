@@ -13,7 +13,6 @@ const PRODUCT_LINKS: Record<string, string> = {
   product159: "https://drive.google.com/drive/folders/1elClIcBLP3FE5gtuHUFwBBWBoFfN5o6l?usp=sharing",
   product161: "https://drive.google.com/drive/folders/1baNo2BVX6oY5mYoqahy0hmbXu1wkzGbK?usp=sharing",
   product199: "https://drive.google.com/file/d/1ZHHXBAZ3Gu8oHkp2B215MkUl5IXtEqft/view?usp=sharing",
-
   product245: "https://drive.google.com/drive/folders/1RqTD_vuq2LvYWH-vpQBAk2d73X6-W4ny?usp=sharing",
   product255: "https://drive.google.com/file/d/1ZHHXBAZ3Gu8oHkp2B215MkUl5IXtEqft/view?usp=sharing",
 };
@@ -25,7 +24,6 @@ const PRODUCT_NAMES: Record<string, string> = {
   product159: "Essential Pack",
   product161: "Professional Pack",
   product199: "Elite Trading Pack",
-
   product245: "Ultimate Learning Pack",
   product255: "Master Resource Pack",
 };
@@ -85,21 +83,21 @@ export async function POST(req: Request) {
     const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
 
     if (!webhookSecret || !signature) {
-      return NextResponse.json({ error: "Missing webhook secret" }, { status: 400 });
+      return new Response("OK", { status: 200 });
     }
 
     const validSignature = verifyPaddleSignature(rawBody, signature, webhookSecret);
 
     if (!validSignature) {
       console.error("Paddle webhook error: Invalid signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+      return new Response("OK", { status: 200 });
     }
 
     const event = JSON.parse(rawBody);
     const eventType = event.event_type;
     const data = event.data || {};
 
-    const eventId = event.event_id || data.id || "unknown";
+    const eventId = event.event_id || `${eventType}_${data.id}`;
 
     if (processedEvents.has(eventId)) {
       return new Response("OK", { status: 200 });
@@ -117,14 +115,11 @@ export async function POST(req: Request) {
       customData.email ||
       "unknown";
 
-    const productName =
-      PRODUCT_NAMES[productId] ||
-      "Digital product";
+    const productName = PRODUCT_NAMES[productId] || "Digital product";
 
-    const amount =
-      data.details?.totals?.grand_total
-        ? (Number(data.details.totals.grand_total) / 100).toFixed(2)
-        : "?";
+    const amount = data.details?.totals?.grand_total
+      ? (Number(data.details.totals.grand_total) / 100).toFixed(2)
+      : "?";
 
     const currency =
       data.currency_code ||
@@ -144,6 +139,22 @@ export async function POST(req: Request) {
     const paymentId = data.id || "unknown";
     const date = new Date().toLocaleString("en-GB");
 
+    if (eventType === "transaction.payment_failed") {
+      await sendTelegram(`⚠️ <b>PAYMENT FAILED</b>
+
+🌐 <b>Website:</b> ${sourceDomain}
+
+👤 <b>Email:</b> ${email}
+📦 <b>Product:</b> ${productName}
+💰 <b>Amount:</b> ${amount} ${currency}
+💳 <b>Payment:</b> ${paymentMethod}
+🌍 <b>Country:</b> ${country}
+🧾 <b>ID:</b> ${paymentId}
+🕒 <b>Date:</b> ${date}`, sourceDomain);
+
+      return new Response("OK", { status: 200 });
+    }
+
     if (eventType !== "transaction.completed" && eventType !== "transaction.paid") {
       return new Response("OK", { status: 200 });
     }
@@ -162,29 +173,24 @@ export async function POST(req: Request) {
 
     const downloadLink = PRODUCT_LINKS[productId];
 
-    if (!downloadLink || email === "unknown") {
-      return new Response("OK", { status: 200 });
+    if (downloadLink && email !== "unknown") {
+      await resend.emails.send({
+        from: "Holytime <support@holytime.auction>",
+        to: email,
+        subject: `Your product: ${productName}`,
+        html: `
+          <h2>Thank you for your purchase 💜</h2>
+          <p>Your product is ready:</p>
+          <p><strong>${productName}</strong></p>
+          <p>
+            <a href="${downloadLink}"
+            style="display:inline-block;padding:12px 20px;background:#6541df;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">
+            Download your product
+            </a>
+          </p>
+        `,
+      });
     }
-
-    await resend.emails.send({
-      from: "Holytime <support@holytime.auction>",
-      to: email,
-      subject: `Your product: ${productName}`,
-      html: `
-        <h2>Thank you for your purchase 💜</h2>
-        <p>Your product is ready:</p>
-        <p><strong>${productName}</strong></p>
-
-        <p>
-          <a href="${downloadLink}"
-          style="display:inline-block;padding:12px 20px;
-          background:#6541df;color:white;border-radius:8px;
-          text-decoration:none;font-weight:bold;">
-          Download your product
-          </a>
-        </p>
-      `,
-    });
 
     return new Response("OK", { status: 200 });
   } catch (err) {
