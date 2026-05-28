@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import crypto from "crypto";
 
@@ -19,11 +18,11 @@ const PRODUCT_LINKS: Record<string, string> = {
 
 const PRODUCT_NAMES: Record<string, string> = {
   starter: "Starter Pack",
-  advanced: "Advanced Pack",
+  advanced: "Advanced Learning Pack",
   premium: "Premium Bundle",
   product159: "Essential Pack",
   product161: "Professional Pack",
-  product199: "Elite Trading Pack",
+  product199: "Elite Pack",
   product245: "Ultimate Learning Pack",
   product255: "Master Resource Pack",
 };
@@ -31,40 +30,46 @@ const PRODUCT_NAMES: Record<string, string> = {
 const processedEvents = new Set<string>();
 
 function verifyPaddleSignature(rawBody: string, signature: string, secret: string) {
-  const parts = Object.fromEntries(
-    signature.split(";").map((part) => {
-      const [key, value] = part.split("=");
-      return [key, value];
-    })
-  );
+  try {
+    const parts = Object.fromEntries(
+      signature.split(";").map((part) => {
+        const [key, value] = part.split("=");
+        return [key, value];
+      })
+    );
 
-  const ts = parts.ts;
-  const h1 = parts.h1;
+    const ts = parts.ts;
+    const h1 = parts.h1;
 
-  if (!ts || !h1) return false;
+    if (!ts || !h1) return false;
 
-  const signedPayload = `${ts}:${rawBody}`;
+    const digest = crypto
+      .createHmac("sha256", secret)
+      .update(`${ts}:${rawBody}`)
+      .digest("hex");
 
-  const digest = crypto
-    .createHmac("sha256", secret)
-    .update(signedPayload)
-    .digest("hex");
-
-  return crypto.timingSafeEqual(
-    Buffer.from(digest, "hex"),
-    Buffer.from(h1, "hex")
-  );
+    return crypto.timingSafeEqual(
+      Buffer.from(digest, "hex"),
+      Buffer.from(h1, "hex")
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function sendTelegram(text: string, sourceDomain: string) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) return;
+
+  if (!botToken) {
+    console.log("NO TELEGRAM_BOT_TOKEN");
+    return;
+  }
 
   const chatId = sourceDomain.includes("holytime.business")
     ? "-1003983054033"
     : "-1003808961913";
 
-  await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+  const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -73,6 +78,9 @@ async function sendTelegram(text: string, sourceDomain: string) {
       parse_mode: "HTML",
     }),
   });
+
+  const tgText = await res.text();
+  console.log("TG RESPONSE:", tgText);
 }
 
 export async function POST(req: Request) {
@@ -82,14 +90,20 @@ export async function POST(req: Request) {
     const signature = req.headers.get("paddle-signature") || "";
     const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
 
-    if (!webhookSecret || !signature) {
+    if (!webhookSecret) {
+      console.log("NO PADDLE_WEBHOOK_SECRET");
+      return new Response("OK", { status: 200 });
+    }
+
+    if (!signature) {
+      console.log("NO PADDLE SIGNATURE");
       return new Response("OK", { status: 200 });
     }
 
     const validSignature = verifyPaddleSignature(rawBody, signature, webhookSecret);
 
     if (!validSignature) {
-      console.error("Paddle webhook error: Invalid signature");
+      console.log("INVALID PADDLE SIGNATURE");
       return new Response("OK", { status: 200 });
     }
 
@@ -97,17 +111,28 @@ export async function POST(req: Request) {
     const eventType = event.event_type;
     const data = event.data || {};
 
-    const eventId = event.event_id || `${eventType}_${data.id}`;
+    console.log("PADDLE EVENT:", eventType);
+
+    const eventId =
+      event.notification_id ||
+      event.event_id ||
+      `${eventType}_${data.id}`;
 
     if (processedEvents.has(eventId)) {
+      console.log("DUPLICATE EVENT:", eventId);
       return new Response("OK", { status: 200 });
     }
 
     processedEvents.add(eventId);
 
     const customData = data.custom_data || {};
-    const productId = customData.productId;
-    const sourceDomain = customData.sourceDomain || req.headers.get("host") || "unknown";
+
+    const productId = customData.productId || "advanced";
+
+    const sourceDomain =
+      customData.sourceDomain ||
+      req.headers.get("host") ||
+      "holytime.space";
 
     const email =
       data.customer?.email ||
@@ -115,7 +140,12 @@ export async function POST(req: Request) {
       customData.email ||
       "unknown";
 
-    const productName = PRODUCT_NAMES[productId] || "Digital product";
+    const productName =
+      PRODUCT_NAMES[productId] ||
+      customData.productName ||
+      data.items?.[0]?.price?.name ||
+      data.items?.[0]?.product?.name ||
+      "Advanced Learning Pack";
 
     const amount = data.details?.totals?.grand_total
       ? (Number(data.details.totals.grand_total) / 100).toFixed(2)
@@ -124,7 +154,7 @@ export async function POST(req: Request) {
     const currency =
       data.currency_code ||
       data.details?.totals?.currency_code ||
-      "";
+      "EUR";
 
     const paymentMethod =
       data.payments?.[0]?.method_details?.type ||
@@ -140,7 +170,7 @@ export async function POST(req: Request) {
     const date = new Date().toLocaleString("en-GB");
 
     if (eventType === "transaction.payment_failed") {
-      await sendTelegram(`⚠️ <b>PAYMENT FAILED</b>
+      await sendTelegram(`⚠️ <b>PADDLE PAYMENT FAILED</b>
 
 🌐 <b>Website:</b> ${sourceDomain}
 
@@ -155,11 +185,11 @@ export async function POST(req: Request) {
       return new Response("OK", { status: 200 });
     }
 
-    if (eventType !== "transaction.completed" && eventType !== "transaction.paid") {
+    if (eventType !== "transaction.completed") {
       return new Response("OK", { status: 200 });
     }
 
-    await sendTelegram(`💸 <b>PAYMENT SUCCESSFUL</b>
+    await sendTelegram(`💸 <b>PADDLE PAYMENT SUCCESSFUL</b>
 
 🌐 <b>Website:</b> ${sourceDomain}
 
