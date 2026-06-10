@@ -130,7 +130,7 @@ export default function ProductPage() {
               <br />
               <br />
               By purchasing, you agree to our{" "}
-              <Link href="/rules" className="underline">terms</Link>,{" "}
+              <Link href="/terms" className="underline">terms</Link>,{" "}
               <Link href="/delivery" className="underline">delivery</Link> and{" "}
               <Link href="/refund-policy" className="underline">refund policy</Link>.
             </p>

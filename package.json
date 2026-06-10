@@ -1,4 +1,6 @@
 {
+  "name": "holytime-final",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -7,6 +9,7 @@
   "dependencies": {
     "@mollie/api-client": "latest",
     "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^20.19.42",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
