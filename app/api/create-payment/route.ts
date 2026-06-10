@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 const PADDLE_PRICE_IDS: Record<string, string> = {
   starter: "pri_01kqstdk4f4h6xm4nf0eqjqhms",
   advanced: "pri_01kqstetc9k2t3jnpm7py0r4pt",
-  premium: "pri_01kqstfrf2r8n6wcefs5wvmyak",
+  premium: "pro_01ktrwspmytnwb38dpccsa7zhv",
 
   product159: "pri_01ksg242d7grz69xsaf7999hd5",
   product161: "pri_01ksg1ychgaeytf7yfftmrs99r",
