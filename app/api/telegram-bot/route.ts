@@ -2,7 +2,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const TIME_ZONE = "Europe/Kyiv";
-const DESK2_CHAT_ID = "-1003808961913";
 const SUCCESS_STATUSES = new Set(["completed", "billed", "paid"]);
 
 function tg(value: unknown) {
@@ -173,7 +172,7 @@ export async function POST(req: Request) {
   const chatId = message?.chat?.id;
   const text = String(message?.text || "").trim().split(/\s+/)[0].split("@")[0].toLowerCase();
 
-  if (!chatId || String(chatId) !== DESK2_CHAT_ID) {
+  if (!chatId) {
     return new Response("OK", { status: 200 });
   }
 
