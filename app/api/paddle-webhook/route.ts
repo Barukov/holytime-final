@@ -163,7 +163,10 @@ async function fetchPaddleCountry(customerId: string, addressId: string) {
     }
 
     const json = await res.json();
-    return json.data?.country_code || null;
+    return {
+      country: json.data?.country_code || null,
+      postalCode: json.data?.postal_code || json.data?.zip_code || null,
+    };
   } catch (error) {
     console.error("Paddle address lookup error:", error);
     return null;
@@ -178,12 +181,35 @@ async function resolveCountry(data: any) {
     data.details?.tax_rates_used?.[0]?.tax_rate_country ||
     null;
 
-  if (directCountry) return directCountry;
+  const customerId = data.customer_id || data.customer?.id || "unknown";
+  const addressId = data.address_id || data.customer?.address_id || "";
+  const paddleAddress = await fetchPaddleCountry(customerId, addressId);
+
+  return directCountry || paddleAddress?.country || "unknown";
+}
+
+async function resolvePostalCode(data: any) {
+  const directPostalCode =
+    data.customer?.address?.postal_code ||
+    data.customer?.address?.zip_code ||
+    data.address?.postal_code ||
+    data.address?.zip_code ||
+    data.billing_details?.address?.postal_code ||
+    data.billing_details?.address?.zip_code ||
+    null;
+
+  if (directPostalCode) return directPostalCode;
 
   const customerId = data.customer_id || data.customer?.id || "unknown";
   const addressId = data.address_id || data.customer?.address_id || "";
+  const paddleAddress = await fetchPaddleCountry(customerId, addressId);
 
-  return (await fetchPaddleCountry(customerId, addressId)) || "unknown";
+  return paddleAddress?.postalCode || "";
+}
+
+function formatCountry(country: unknown, postalCode: unknown) {
+  const zip = String(postalCode || "").trim();
+  return zip ? `${country} ZIP: ${zip}` : String(country || "unknown");
 }
 
 function buildPaymentMessage(title: string, details: Record<string, unknown>) {
@@ -195,7 +221,7 @@ ${ICONS.email} <b>Email:</b> ${escapeHtml(details.email)}
 ${ICONS.product} <b>Product:</b> ${escapeHtml(details.product)}
 ${ICONS.amount} <b>Amount:</b> ${escapeHtml(details.amount)} ${escapeHtml(details.currency)}
 ${ICONS.payment} <b>Payment:</b> ${escapeHtml(details.paymentMethod)}
-${ICONS.country} <b>Country:</b> ${escapeHtml(details.country)}
+${ICONS.country} <b>Country:</b> ${escapeHtml(formatCountry(details.country, details.postalCode))}
 ${details.errorCode ? `${ICONS.error} <b>Error:</b> ${escapeHtml(details.errorCode)}
 ${ICONS.reason} <b>Reason:</b> ${escapeHtml(details.errorReason)}
 ` : ""}${ICONS.id} <b>ID:</b> ${escapeHtml(details.transactionId)}
@@ -320,6 +346,7 @@ export async function POST(req: Request) {
     const payment = latestPayment(data.payments);
     const failureReason = getFailureReason(payment, data);
     const country = await resolveCountry(data);
+    const postalCode = await resolvePostalCode(data);
 
     const details = {
       website: sourceDomain,
@@ -335,6 +362,7 @@ export async function POST(req: Request) {
       paymentMethod: getPaymentMethod(payment),
       paymentStatus: payment.status || data.status || "unknown",
       country,
+      postalCode,
       transactionId: data.id || "unknown",
       date: new Date().toLocaleString("en-GB"),
     };
