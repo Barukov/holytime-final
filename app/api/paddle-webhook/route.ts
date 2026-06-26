@@ -64,6 +64,8 @@ const PAYMENT_ERROR_MESSAGES: Record<string, string> = {
 };
 
 const processedEvents = new Set<string>();
+const processedTransactions = new Set<string>();
+const DESK2_CHAT_ID = "-1003808961913";
 
 function escapeHtml(value: unknown) {
   return String(value ?? "")
@@ -208,17 +210,11 @@ async function sendTelegram(text: string, sourceDomain: string) {
     return;
   }
 
-  const chatId =
-    process.env.TELEGRAM_CHAT_ID ||
-    (sourceDomain.includes("holytime.business")
-      ? "-1003983054033"
-      : "-1003808961913");
-
   const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      chat_id: chatId,
+      chat_id: DESK2_CHAT_ID,
       text,
       parse_mode: "HTML",
       disable_web_page_preview: true,
@@ -228,6 +224,19 @@ async function sendTelegram(text: string, sourceDomain: string) {
   if (!res.ok) {
     console.error("TG RESPONSE:", await res.text());
   }
+}
+
+function normalizeSourceDomain(value: unknown) {
+  return String(value || "")
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .split("/")[0]
+    .toLowerCase();
+}
+
+function shouldProcessSourceDomain(sourceDomain: string) {
+  const domain = normalizeSourceDomain(sourceDomain);
+  return domain === "holytime-final.vercel.app";
 }
 
 export async function POST(req: Request) {
@@ -272,16 +281,36 @@ export async function POST(req: Request) {
 
     processedEvents.add(eventId);
 
+    const sourceDomain =
+      data.custom_data?.sourceDomain ||
+      req.headers.get("host") ||
+      "holytime.space";
+
+    if (!shouldProcessSourceDomain(sourceDomain)) {
+      console.log("IGNORED SOURCE DOMAIN:", sourceDomain);
+      return new Response("OK", { status: 200 });
+    }
+
+    const transactionEventId = `${eventType}_${data.id || "unknown"}`;
+
+    if (
+      data.id &&
+      (eventType === "transaction.payment_failed" || eventType === "transaction.completed") &&
+      processedTransactions.has(transactionEventId)
+    ) {
+      console.log("DUPLICATE TRANSACTION EVENT:", transactionEventId);
+      return new Response("OK", { status: 200 });
+    }
+
+    if (data.id && (eventType === "transaction.payment_failed" || eventType === "transaction.completed")) {
+      processedTransactions.add(transactionEventId);
+    }
+
     const customData = data.custom_data || {};
     const productId = customData.productId || "advanced";
     const payment = latestPayment(data.payments);
     const failureReason = getFailureReason(payment, data);
     const country = await resolveCountry(data);
-
-    const sourceDomain =
-      customData.sourceDomain ||
-      req.headers.get("host") ||
-      "holytime.space";
 
     const details = {
       website: sourceDomain,
