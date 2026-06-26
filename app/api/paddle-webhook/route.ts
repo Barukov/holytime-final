@@ -108,20 +108,6 @@ function getPaymentMethod(payment: any) {
   );
 }
 
-function getPaymentCard(payment: any) {
-  const card = payment.method_details?.card;
-
-  if (!card) return "unknown";
-
-  return [
-    card.type,
-    card.brand,
-    card.last4 ? `**** ${card.last4}` : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
-
 function getFailureReason(payment: any, data: any) {
   const code =
     payment.error_code ||
@@ -186,19 +172,17 @@ async function resolveCountry(data: any) {
 function buildPaymentMessage(title: string, details: Record<string, unknown>) {
   return `<b>${title}</b>
 
-<b>Website:</b> ${escapeHtml(details.website)}
-<b>Email:</b> ${escapeHtml(details.email)}
-<b>Product:</b> ${escapeHtml(details.product)}
-<b>Amount:</b> ${escapeHtml(details.amount)} ${escapeHtml(details.currency)}
-<b>Payment method:</b> ${escapeHtml(details.paymentMethod)}
-<b>Card:</b> ${escapeHtml(details.paymentCard)}
-<b>Payment status:</b> ${escapeHtml(details.paymentStatus)}
-<b>Country:</b> ${escapeHtml(details.country)}
-${details.errorCode ? `<b>Error code:</b> ${escapeHtml(details.errorCode)}
-<b>Error reason:</b> ${escapeHtml(details.errorReason)}
-` : ""}<b>Transaction ID:</b> ${escapeHtml(details.transactionId)}
-<b>Customer ID:</b> ${escapeHtml(details.customerId)}
-<b>Date:</b> ${escapeHtml(details.date)}`;
+🌐 <b>Website:</b> ${escapeHtml(details.website)}
+
+👤 <b>Email:</b> ${escapeHtml(details.email)}
+📦 <b>Product:</b> ${escapeHtml(details.product)}
+💰 <b>Amount:</b> ${escapeHtml(details.amount)} ${escapeHtml(details.currency)}
+💳 <b>Payment:</b> ${escapeHtml(details.paymentMethod)}
+🌍 <b>Country:</b> ${escapeHtml(details.country)}
+${details.errorCode ? `⚠️ <b>Error:</b> ${escapeHtml(details.errorCode)}
+📝 <b>Reason:</b> ${escapeHtml(details.errorReason)}
+` : ""}🧾 <b>ID:</b> ${escapeHtml(details.transactionId)}
+🕒 <b>Date:</b> ${escapeHtml(details.date)}`;
 }
 
 async function sendTelegram(text: string, sourceDomain: string) {
@@ -296,11 +280,9 @@ export async function POST(req: Request) {
       amount: getAmount(data),
       currency: data.currency_code || data.details?.totals?.currency_code || "EUR",
       paymentMethod: getPaymentMethod(payment),
-      paymentCard: getPaymentCard(payment),
       paymentStatus: payment.status || data.status || "unknown",
       country,
       transactionId: data.id || "unknown",
-      customerId: data.customer_id || data.customer?.id || "unknown",
       date: new Date().toLocaleString("en-GB"),
     };
 
