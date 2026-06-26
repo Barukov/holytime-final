@@ -267,7 +267,16 @@ export async function POST(req: Request) {
     const eventType = event.event_type;
     const data = event.data || {};
 
-    console.log("PADDLE EVENT:", eventType);
+    console.log(
+      "PADDLE EVENT:",
+      eventType,
+      "txn:",
+      data.id || "unknown",
+      "event:",
+      event.event_id || "unknown",
+      "notification:",
+      event.notification_id || "unknown"
+    );
 
     const eventId =
       event.notification_id ||

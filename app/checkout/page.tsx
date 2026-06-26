@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Script from "next/script";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -19,7 +19,9 @@ const PADDLE_CLIENT_TOKEN = "live_c0bb423aebbbe5671abf6d87cd4";
 
 export default function CheckoutPage() {
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [checkoutOpened, setCheckoutOpened] = useState(false);
   const [message, setMessage] = useState("Preparing secure checkout...");
+  const openedTransactionRef = useRef<string | null>(null);
 
   const getTransactionId = useCallback(() => {
     const params = new URLSearchParams(window.location.search);
@@ -36,6 +38,11 @@ export default function CheckoutPage() {
 
     if (!window.Paddle) {
       setMessage("Checkout is still loading. Please try again in a moment.");
+      return;
+    }
+
+    if (openedTransactionRef.current === transactionId) {
+      setMessage("Checkout is already open. Complete payment in the secure Paddle window.");
       return;
     }
 
@@ -67,6 +74,8 @@ export default function CheckoutPage() {
         },
       });
 
+      openedTransactionRef.current = transactionId;
+      setCheckoutOpened(true);
       setMessage("Checkout is open. Complete payment in the secure Paddle window.");
     } catch (error) {
       console.error("Paddle checkout open error:", error);
@@ -97,7 +106,8 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={openCheckout}
-            className="rounded-xl bg-white px-6 py-3 font-bold text-black transition hover:bg-white/90"
+            disabled={checkoutOpened}
+            className="rounded-xl bg-white px-6 py-3 font-bold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Open checkout
           </button>
