@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     const apiKey = process.env.PADDLE_API_KEY;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
 
     if (!apiKey || !siteUrl) {
       return NextResponse.json({ error: "Missing env" }, { status: 500 });
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
           sourceDomain,
         },
         checkout: {
-          url: `${siteUrl}/success`,
+          url: `${siteUrl}/checkout`,
         },
       }),
     });
