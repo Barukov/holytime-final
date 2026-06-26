@@ -27,6 +27,21 @@ const PRODUCT_NAMES: Record<string, string> = {
   product255: "Master Resource Pack",
 };
 
+const ICONS = {
+  success: "\u{1F4B8}",
+  failed: "\u{26A0}\u{FE0F}",
+  website: "\u{1F310}",
+  email: "\u{1F464}",
+  product: "\u{1F4E6}",
+  amount: "\u{1F4B0}",
+  payment: "\u{1F4B3}",
+  country: "\u{1F30D}",
+  error: "\u{26A0}\u{FE0F}",
+  reason: "\u{1F4DD}",
+  id: "\u{1F9FE}",
+  date: "\u{1F552}",
+};
+
 const PAYMENT_ERROR_MESSAGES: Record<string, string> = {
   authentication_failed: "3DS authentication failed.",
   blocked_card: "Card is blocked, frozen, lost, damaged, or stolen.",
@@ -172,17 +187,17 @@ async function resolveCountry(data: any) {
 function buildPaymentMessage(title: string, details: Record<string, unknown>) {
   return `<b>${title}</b>
 
-🌐 <b>Website:</b> ${escapeHtml(details.website)}
+${ICONS.website} <b>Website:</b> ${escapeHtml(details.website)}
 
-👤 <b>Email:</b> ${escapeHtml(details.email)}
-📦 <b>Product:</b> ${escapeHtml(details.product)}
-💰 <b>Amount:</b> ${escapeHtml(details.amount)} ${escapeHtml(details.currency)}
-💳 <b>Payment:</b> ${escapeHtml(details.paymentMethod)}
-🌍 <b>Country:</b> ${escapeHtml(details.country)}
-${details.errorCode ? `⚠️ <b>Error:</b> ${escapeHtml(details.errorCode)}
-📝 <b>Reason:</b> ${escapeHtml(details.errorReason)}
-` : ""}🧾 <b>ID:</b> ${escapeHtml(details.transactionId)}
-🕒 <b>Date:</b> ${escapeHtml(details.date)}`;
+${ICONS.email} <b>Email:</b> ${escapeHtml(details.email)}
+${ICONS.product} <b>Product:</b> ${escapeHtml(details.product)}
+${ICONS.amount} <b>Amount:</b> ${escapeHtml(details.amount)} ${escapeHtml(details.currency)}
+${ICONS.payment} <b>Payment:</b> ${escapeHtml(details.paymentMethod)}
+${ICONS.country} <b>Country:</b> ${escapeHtml(details.country)}
+${details.errorCode ? `${ICONS.error} <b>Error:</b> ${escapeHtml(details.errorCode)}
+${ICONS.reason} <b>Reason:</b> ${escapeHtml(details.errorReason)}
+` : ""}${ICONS.id} <b>ID:</b> ${escapeHtml(details.transactionId)}
+${ICONS.date} <b>Date:</b> ${escapeHtml(details.date)}`;
 }
 
 async function sendTelegram(text: string, sourceDomain: string) {
@@ -288,7 +303,7 @@ export async function POST(req: Request) {
 
     if (eventType === "transaction.payment_failed") {
       await sendTelegram(
-        buildPaymentMessage("PADDLE PAYMENT FAILED", {
+        buildPaymentMessage(`${ICONS.failed} PADDLE PAYMENT FAILED`, {
           ...details,
           errorCode: failureReason.code,
           errorReason: failureReason.message,
@@ -304,7 +319,7 @@ export async function POST(req: Request) {
     }
 
     await sendTelegram(
-      buildPaymentMessage("PADDLE PAYMENT SUCCESSFUL", details),
+      buildPaymentMessage(`${ICONS.success} PADDLE PAYMENT SUCCESSFUL`, details),
       sourceDomain
     );
 
