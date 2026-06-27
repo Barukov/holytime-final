@@ -43,24 +43,24 @@ const ICONS = {
 };
 
 const PAYMENT_ERROR_MESSAGES: Record<string, string> = {
-  authentication_failed: "3DS authentication failed.",
-  blocked_card: "Card is blocked, frozen, lost, damaged, or stolen.",
-  canceled: "Customer, bank, or provider canceled the payment.",
-  declined: "Payment declined by issuer or provider.",
-  declined_not_retryable: "Payment declined and should not be retried.",
-  expired_card: "Card is expired.",
-  fraud: "Payment flagged as potentially fraudulent.",
-  invalid_amount: "Issuer or provider cannot process this amount.",
-  invalid_payment_details: "Payment details are invalid.",
-  issuer_unavailable: "Payment provider could not reach the issuer.",
+  authentication_failed: "3DS/bank verification failed. The customer opened the bank confirmation challenge, but the bank did not approve it.",
+  blocked_card: "The card is blocked, frozen, lost, damaged, or stolen. Customer should try another card.",
+  canceled: "Payment was canceled by the customer, bank, or payment provider.",
+  declined: "Payment was declined by the bank or payment provider. Customer should try another card.",
+  declined_not_retryable: "Payment was declined and should not be retried with the same card.",
+  expired_card: "The card is expired. Customer should use another card.",
+  fraud: "Payment was blocked as potentially fraudulent.",
+  invalid_amount: "The bank or payment provider cannot process this amount.",
+  invalid_payment_details: "Payment details are invalid. Customer should re-enter card details or use another card.",
+  issuer_unavailable: "The bank was unavailable and could not confirm the payment.",
   not_enough_balance: "Insufficient funds or card limit reached.",
   preferred_network_not_supported: "Selected card network is not supported.",
-  prepaid_card_not_supported: "Prepaid cards are blocked for this account.",
-  psp_error: "Payment provider error.",
-  redacted_payment_method: "Payment method details were redacted.",
-  system_error: "Paddle platform error.",
-  transaction_not_permitted: "Issuer does not allow this kind of payment.",
-  unknown: "Unknown payment failure.",
+  prepaid_card_not_supported: "Prepaid cards are not supported for this payment.",
+  psp_error: "Payment provider error. Customer can retry later or use another payment method.",
+  redacted_payment_method: "Payment method details were redacted by the provider.",
+  system_error: "Paddle platform error. Customer can retry later.",
+  transaction_not_permitted: "The bank does not allow this type of transaction.",
+  unknown: "Unknown payment failure. Check Paddle transaction details for the exact bank/provider response.",
 };
 
 const processedEvents = new Set<string>();
@@ -105,7 +105,39 @@ function verifyPaddleSignature(rawBody: string, signature: string, secret: strin
 
 function latestPayment(payments: any[]) {
   if (!Array.isArray(payments) || payments.length === 0) return {};
-  return payments[payments.length - 1] || {};
+
+  return [...payments].sort((a, b) => {
+    const aTime = new Date(a?.created_at || 0).getTime();
+    const bTime = new Date(b?.created_at || 0).getTime();
+    return bTime - aTime;
+  })[0] || {};
+}
+
+function latestFailedPayment(payments: any[]) {
+  if (!Array.isArray(payments) || payments.length === 0) return {};
+
+  const failedPayments = payments.filter((payment) => {
+    const status = String(payment?.status || "").toLowerCase();
+    return status === "error" || status === "failed" || Boolean(payment?.error_code);
+  });
+
+  return latestPayment(failedPayments.length ? failedPayments : payments);
+}
+
+function paymentFingerprint(eventType: string, transactionId: unknown, payment: any) {
+  if (eventType === "transaction.completed") {
+    return `${eventType}_${transactionId || "unknown"}`;
+  }
+
+  return [
+    eventType,
+    transactionId || "unknown",
+    payment?.payment_attempt_id ||
+      payment?.payment_method_id ||
+      payment?.created_at ||
+      payment?.error_code ||
+      "unknown",
+  ].join("_");
 }
 
 function getAmount(data: any) {
@@ -326,7 +358,13 @@ export async function POST(req: Request) {
       return new Response("OK", { status: 200 });
     }
 
-    const transactionEventId = `${eventType}_${data.id || "unknown"}`;
+    const customData = data.custom_data || {};
+    const productId = customData.productId || "advanced";
+    const payment =
+      eventType === "transaction.payment_failed"
+        ? latestFailedPayment(data.payments)
+        : latestPayment(data.payments);
+    const transactionEventId = paymentFingerprint(eventType, data.id, payment);
 
     if (
       data.id &&
@@ -341,9 +379,6 @@ export async function POST(req: Request) {
       processedTransactions.add(transactionEventId);
     }
 
-    const customData = data.custom_data || {};
-    const productId = customData.productId || "advanced";
-    const payment = latestPayment(data.payments);
     const failureReason = getFailureReason(payment, data);
     const country = await resolveCountry(data);
     const postalCode = await resolvePostalCode(data);
