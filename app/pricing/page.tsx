@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const products = [
   ["product161", "Professional Digital Pack", "€161", "Advanced worksheets, trackers and premium materials."],
-  ["product199", "Elite Trading Pack", "€199", "Educational materials, structured learning resources and technical study guides."],
+  ["product199", "Elite Learning Pack", "€199", "Educational materials, structured learning resources and practical study guides."],
   ["starter", "Starter Digital Pack", "€219", "PDF guides, checklists, note templates and study planners."],
   ["product245", "Ultimate Learning Pack", "€245", "Advanced guides, templates, worksheets and structured learning resources."],
   ["product159", "Essential Digital Pack", "€249", "Core guides, templates and study resources."],
@@ -81,3 +81,4 @@ export default function PricingPage() {
     </main>
   );
 }
+

@@ -6,14 +6,14 @@ export const runtime = "nodejs";
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
 const PRODUCT_LINKS: Record<string, string> = {
-  starter: "https://drive.google.com/drive/folders/1gJW0fFRcY1O1JlnePnqUp2gTm8XUU9kh?usp=sharing",
-  advanced: "https://drive.google.com/file/d/102z289XsEfuHbrOvPazAhWjE1VE4HgfK/view?usp=sharing",
-  premium: "https://drive.google.com/drive/folders/1RqTD_vuq2LvYWH-vpQBAk2d73X6-W4ny?usp=sharing",
-  product159: "https://drive.google.com/drive/folders/1elClIcBLP3FE5gtuHUFwBBWBoFfN5o6l?usp=sharing",
-  product161: "https://drive.google.com/drive/folders/1baNo2BVX6oY5mYoqahy0hmbXu1wkzGbK?usp=sharing",
-  product199: "https://drive.google.com/file/d/1ZHHXBAZ3Gu8oHkp2B215MkUl5IXtEqft/view?usp=sharing",
-  product245: "https://drive.google.com/drive/folders/1RqTD_vuq2LvYWH-vpQBAk2d73X6-W4ny?usp=sharing",
-  product255: "https://drive.google.com/file/d/1ZHHXBAZ3Gu8oHkp2B215MkUl5IXtEqft/view?usp=sharing",
+  starter: "/downloads/Starter-Digital-Pack.pdf",
+  advanced: "/downloads/Advanced-Digital-Pack.pdf",
+  premium: "/downloads/Premium-Digital-Bundle.pdf",
+  product159: "/downloads/Essential-Digital-Pack.pdf",
+  product161: "/downloads/Professional-Digital-Pack.pdf",
+  product199: "/downloads/Elite-Learning-Pack.pdf",
+  product245: "/downloads/Ultimate-Learning-Pack.pdf",
+  product255: "/downloads/Master-Resource-Pack.pdf",
 };
 
 const PRODUCT_NAMES: Record<string, string> = {
@@ -22,10 +22,25 @@ const PRODUCT_NAMES: Record<string, string> = {
   premium: "Premium Bundle",
   product159: "Essential Pack",
   product161: "Professional Pack",
-  product199: "Elite Pack",
+  product199: "Elite Learning Pack",
   product245: "Ultimate Learning Pack",
   product255: "Master Resource Pack",
 };
+function buildDownloadLink(productId: string, sourceDomain: unknown) {
+  const link = PRODUCT_LINKS[productId];
+
+  if (!link) return "";
+  if (/^https?:\/\//i.test(link)) return link;
+
+  const domain = String(sourceDomain || "")
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .split("/")[0]
+    .toLowerCase();
+
+  return `https://${domain}${link.startsWith("/") ? link : `/${link}`}`;
+}
+
 
 const ICONS = {
   success: "\u{1F4B8}",
@@ -43,7 +58,7 @@ const ICONS = {
 };
 
 const PAYMENT_ERROR_MESSAGES: Record<string, string> = {
-  authentication_failed: "3DS/bank verification failed. The customer opened the bank confirmation challenge, but the bank did not approve it.",
+  authentication_failed: "3DS authentication failed. Customer completed the bank verification challenge, but it was not successful.",
   blocked_card: "The card is blocked, frozen, lost, damaged, or stolen. Customer should try another card.",
   canceled: "Payment was canceled by the customer, bank, or payment provider.",
   declined: "Payment was declined by the bank or payment provider. Customer should try another card.",
@@ -424,7 +439,7 @@ export async function POST(req: Request) {
       sourceDomain
     );
 
-    const downloadLink = PRODUCT_LINKS[productId];
+    const downloadLink = buildDownloadLink(String(productId), sourceDomain);
 
     if (downloadLink && details.email !== "unknown") {
       await resend.emails.send({
@@ -451,3 +466,4 @@ export async function POST(req: Request) {
     return new Response("OK", { status: 200 });
   }
 }
+
