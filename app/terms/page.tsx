@@ -3,7 +3,7 @@ import Link from "next/link";
 const sections = [
   {
     title: "1. Business and website",
-    text: "These Terms and Conditions govern the Holytime website and digital products. Holytime is the sole proprietor brand used for this digital product store.",
+    text: "These Terms and Conditions govern the Holytime website at https://holytime.dev/ and its digital products. Holytime is the sole proprietor brand used for this digital product store.",
   },
   {
     title: "2. Products and deliverables",

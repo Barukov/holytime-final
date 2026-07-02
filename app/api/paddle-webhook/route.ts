@@ -309,7 +309,7 @@ function normalizeSourceDomain(value: unknown) {
 
 function shouldProcessSourceDomain(sourceDomain: string) {
   const domain = normalizeSourceDomain(sourceDomain);
-  return domain === "holytime-final.vercel.app";
+  return domain === "holytime.dev";
 }
 
 export async function POST(req: Request) {
