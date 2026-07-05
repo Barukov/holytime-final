@@ -80,7 +80,13 @@ const PAYMENT_ERROR_MESSAGES: Record<string, string> = {
 
 const processedEvents = new Set<string>();
 const processedTransactions = new Set<string>();
-const DESK2_CHAT_ID = "-1003808961913";
+const DEFAULT_DESK2_CHAT_ID = "-1003808961913";
+const DEFAULT_ALLOWED_SOURCE_DOMAINS = new Set([
+  "holytime.dev",
+  "holytime.space",
+  "holytime.auction",
+  "holytime-final.vercel.app",
+]);
 
 function escapeHtml(value: unknown) {
   return String(value ?? "")
@@ -277,9 +283,15 @@ ${ICONS.date} <b>Date:</b> ${escapeHtml(details.date)}`;
 
 async function sendTelegram(text: string, sourceDomain: string) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = getTelegramChatId(sourceDomain);
 
   if (!botToken) {
     console.log("NO TELEGRAM_BOT_TOKEN");
+    return;
+  }
+
+  if (!chatId) {
+    console.log("NO TELEGRAM_CHAT_ID");
     return;
   }
 
@@ -287,7 +299,7 @@ async function sendTelegram(text: string, sourceDomain: string) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      chat_id: DESK2_CHAT_ID,
+      chat_id: chatId,
       text,
       parse_mode: "HTML",
       disable_web_page_preview: true,
@@ -296,7 +308,10 @@ async function sendTelegram(text: string, sourceDomain: string) {
 
   if (!res.ok) {
     console.error("TG RESPONSE:", await res.text());
+    return;
   }
+
+  console.log("TG SENT:", chatId, sourceDomain);
 }
 
 function normalizeSourceDomain(value: unknown) {
@@ -307,9 +322,36 @@ function normalizeSourceDomain(value: unknown) {
     .toLowerCase();
 }
 
+function getTelegramChatId(sourceDomain: string) {
+  const domain = normalizeSourceDomain(sourceDomain);
+  const chatIdsByDomain = String(process.env.TELEGRAM_CHAT_IDS_BY_DOMAIN || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  for (const entry of chatIdsByDomain) {
+    const separatorIndex = entry.indexOf(":");
+    if (separatorIndex === -1) continue;
+
+    const entryDomain = normalizeSourceDomain(entry.slice(0, separatorIndex));
+    const chatId = entry.slice(separatorIndex + 1).trim();
+
+    if (entryDomain === domain && chatId) {
+      return chatId;
+    }
+  }
+
+  return process.env.TELEGRAM_CHAT_ID || DEFAULT_DESK2_CHAT_ID;
+}
+
 function shouldProcessSourceDomain(sourceDomain: string) {
   const domain = normalizeSourceDomain(sourceDomain);
-  return domain === "holytime.dev";
+  const configuredDomains = String(process.env.ALLOWED_SOURCE_DOMAINS || "")
+    .split(",")
+    .map(normalizeSourceDomain)
+    .filter(Boolean);
+
+  return DEFAULT_ALLOWED_SOURCE_DOMAINS.has(domain) || configuredDomains.includes(domain);
 }
 
 export async function POST(req: Request) {
@@ -466,4 +508,3 @@ export async function POST(req: Request) {
     return new Response("OK", { status: 200 });
   }
 }
-
