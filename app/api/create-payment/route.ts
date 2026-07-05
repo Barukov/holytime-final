@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing env" }, { status: 500 });
     }
 
-    const sourceDomain = req.headers.get("host") || siteUrl;
+    const sourceDomain = new URL(siteUrl).host;
 
     const res = await fetch("https://api.paddle.com/transactions", {
       method: "POST",
