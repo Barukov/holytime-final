@@ -17,11 +17,11 @@ const PRODUCT_LINKS: Record<string, string> = {
 };
 
 const PRODUCT_NAMES: Record<string, string> = {
-  starter: "Starter Pack",
+  starter: "Starter Learning Pack",
   advanced: "Advanced Learning Pack",
-  premium: "Premium Bundle",
-  product159: "Essential Pack",
-  product161: "Professional Pack",
+  premium: "Premium Resource Bundle",
+  product159: "Essential Learning Pack",
+  product161: "Professional Learning Pack",
   product199: "Elite Learning Pack",
   product245: "Ultimate Learning Pack",
   product255: "Master Resource Pack",
@@ -84,7 +84,6 @@ const DEFAULT_DESK2_CHAT_ID = "-1003808961913";
 const DEFAULT_ALLOWED_SOURCE_DOMAINS = new Set([
   "holytime.dev",
   "holytime.space",
-  "holytime.auction",
   "holytime-final.vercel.app",
 ]);
 
@@ -485,7 +484,7 @@ export async function POST(req: Request) {
 
     if (downloadLink && details.email !== "unknown") {
       await resend.emails.send({
-        from: "Holytime <support@holytime.auction>",
+        from: "Holytime <support@holytime.space>",
         to: String(details.email),
         subject: `Your product: ${details.product}`,
         html: `

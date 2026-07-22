@@ -9,41 +9,81 @@ const products: any = {
     name: "Essential Learning Pack",
     price: "€249",
     tag: "Special offer",
+    description:
+      "Core learning materials including practical guides, reusable templates, checklists and study resources for daily organization.",
+    includes: ["Core study guides", "Reusable checklists", "Daily planning templates", "Basic worksheet files"],
+    outcome:
+      "Built for customers who want a clear digital toolkit for organizing learning tasks, notes and weekly study routines.",
   },
   product161: {
     name: "Professional Learning Pack",
     price: "€161",
     tag: "Special offer",
+    description:
+      "A focused digital pack with advanced worksheets, progress trackers, planning templates and practical study materials for independent learning.",
+    includes: ["Advanced worksheets", "Progress trackers", "Planning templates", "Study workflow resources"],
+    outcome:
+      "Designed for users who need a more organized set of practical resources for independent study and personal productivity.",
   },
   product199: {
     name: "Elite Learning Pack",
     price: "€199",
     tag: "Best value",
+    description:
+      "A structured collection of premium learning guides, study templates, resource files and workflow checklists for organized self-study.",
+    includes: ["Premium study guides", "Workflow checklists", "Resource templates", "Self-study planning files"],
+    outcome:
+      "A balanced package for customers who want structured learning materials and reusable files in one digital product.",
   },
   starter: {
     name: "Starter Learning Pack",
     price: "€219",
     tag: "For beginners",
+    description:
+      "Entry-level digital learning resources with PDF guides, checklists, note templates and weekly study planners delivered by email.",
+    includes: ["Beginner PDF guides", "Note templates", "Weekly study planners", "Starter checklists"],
+    outcome:
+      "Created for new customers who want simple, ready-to-use digital materials to start planning and tracking study work.",
   },
   product245: {
     name: "Ultimate Learning Pack",
     price: "€245",
     tag: "Advanced",
+    description:
+      "A larger digital pack with advanced guides, printable worksheets, planning templates and structured learning resources.",
+    includes: ["Advanced PDF guides", "Printable worksheets", "Planning templates", "Structured resource files"],
+    outcome:
+      "A deeper resource pack for customers who want more complete learning materials and printable study assets.",
   },
   advanced: {
     name: "Advanced Learning Pack",
     price: "€250",
     tag: "Most popular",
+    description:
+      "A detailed digital learning package with examples, worksheets, progress trackers, templates and structured resource files.",
+    includes: ["Practical examples", "Detailed worksheets", "Progress trackers", "Advanced templates"],
+    outcome:
+      "Best for customers who already have a study routine and want more detailed resources for planning, review and progress tracking.",
   },
   product255: {
     name: "Master Resource Pack",
     price: "€255",
     tag: "Premium choice",
+    description:
+      "Premium resource materials for deeper study, including advanced guides, templates, planning systems and progress-tracking files.",
+    includes: ["Master guides", "Planning systems", "Progress files", "Premium templates"],
+    outcome:
+      "A premium digital pack for customers who need a complete set of organized resources for longer-term learning plans.",
   },
   premium: {
     name: "Premium Resource Bundle",
     price: "€500",
     tag: "Premium",
+    description:
+      "The full digital resource library with guides, templates, worksheets, planners, checklists and bonus learning materials.",
+    includes: ["Full guide library", "Templates and planners", "Worksheets and checklists", "Bonus digital materials"],
+    outcome:
+      "The most complete Holytime bundle, combining the full library of downloadable digital learning resources in one purchase.",
   },
 };
 
@@ -124,9 +164,14 @@ export default function ProductPage() {
               {product.name}
             </h1>
 
-            <p className="mt-6 text-xl leading-9 text-white/75">
-              Premium digital learning pack with structured guides, templates,
-              worksheets, checklists and planning resources for personal study.
+            <p className="mt-6 max-w-3xl text-xl leading-9 text-white/75">
+              {product.description}
+              <br />
+              <br />
+              This is a one-time digital product delivered by email after
+              successful payment confirmation. It includes learning guides,
+              templates, worksheets, checklists, planners and downloadable
+              resource files for personal study and organization.
               <br />
               <br />
               By purchasing, you agree to our{" "}
@@ -169,15 +214,29 @@ export default function ProductPage() {
       <section id="details" className="px-8 py-24">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-5xl font-black">
-            What’s inside <span className="text-[#7657e8]">the pack?</span>
+            What’s inside <span className="text-[#7657e8]">{product.name}</span>?
           </h2>
 
+          <p className="mt-6 max-w-4xl text-xl leading-9 text-black/60">
+            {product.outcome}
+          </p>
+
           <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            {["PDF guides", "Worksheets", "Study planner", "Checklists", "Templates", "Progress tracker"].map((x) => (
+            {product.includes.map((x: string) => (
               <div key={x} className="rounded-[14px] bg-white p-5 font-bold shadow-sm">
                 ✓ {x}
               </div>
             ))}
+          </div>
+
+          <div className="mt-10 rounded-[20px] bg-white p-8 shadow-sm">
+            <h3 className="text-3xl font-black">Digital delivery details</h3>
+            <p className="mt-4 text-lg leading-8 text-black/60">
+              The product is delivered as downloadable digital resource files
+              after successful payment confirmation. No physical items are
+              shipped, and Holytime does not provide regulated financial,
+              investment, adult, gambling or crypto services.
+            </p>
           </div>
         </div>
       </section>
@@ -267,4 +326,3 @@ export default function ProductPage() {
     </main>
   );
 }
-

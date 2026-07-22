@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 const products = [
-  ["product161", "Professional Digital Pack", "€161", "Advanced worksheets, trackers and premium materials."],
-  ["product199", "Elite Learning Pack", "€199", "Educational materials, structured learning resources and practical study guides."],
-  ["starter", "Starter Digital Pack", "€219", "PDF guides, checklists, note templates and study planners."],
-  ["product245", "Ultimate Learning Pack", "€245", "Advanced guides, templates, worksheets and structured learning resources."],
-  ["product159", "Essential Digital Pack", "€249", "Core guides, templates and study resources."],
-  ["advanced", "Advanced Digital Pack", "€250", "Worksheets, examples, progress trackers and structured resources."],
-  ["product255", "Master Resource Pack", "€255", "Premium materials, advanced resources, templates and study systems."],
-  ["premium", "Premium Digital Bundle", "€500", "Full digital resource library with guides, templates, worksheets and bonuses."],
+  ["product161", "Professional Learning Pack", "€161", "A focused digital pack with advanced worksheets, progress trackers, planning templates and practical study materials for independent learning."],
+  ["product199", "Elite Learning Pack", "€199", "A structured collection of premium learning guides, study templates, resource files and workflow checklists for organized self-study."],
+  ["starter", "Starter Learning Pack", "€219", "Entry-level digital learning resources with PDF guides, checklists, note templates and weekly study planners delivered by email."],
+  ["product245", "Ultimate Learning Pack", "€245", "A larger digital pack with advanced guides, printable worksheets, planning templates and structured learning resources."],
+  ["product159", "Essential Learning Pack", "€249", "Core learning materials including practical guides, reusable templates, checklists and study resources for daily organization."],
+  ["advanced", "Advanced Learning Pack", "€250", "A detailed digital learning package with examples, worksheets, progress trackers, templates and structured resource files."],
+  ["product255", "Master Resource Pack", "€255", "Premium resource materials for deeper study, including advanced guides, templates, planning systems and progress-tracking files."],
+  ["premium", "Premium Resource Bundle", "€500", "The full digital resource library with guides, templates, worksheets, planners, checklists and bonus learning materials."],
 ];
 
 const deliverables = [
@@ -41,9 +41,9 @@ export default function PricingPage() {
           </p>
           <h1 className="mt-4 text-6xl font-black">Products and pricing</h1>
           <p className="mt-6 text-lg leading-8 text-black/60">
-            Holytime sells digital learning products through https://holytime.auction/.
-            All purchases are digital products delivered by email after successful
-            payment confirmation.
+            Holytime sells one-time digital learning and productivity resource
+            packs through https://holytime.dev/. All purchases are digital
+            products delivered by email after successful payment confirmation.
           </p>
         </div>
 
@@ -81,4 +81,3 @@ export default function PricingPage() {
     </main>
   );
 }
-
